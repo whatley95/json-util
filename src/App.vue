@@ -639,11 +639,13 @@ header {
 
 /* Style for tool descriptions */
 .tool-description {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: var(--text-muted);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   max-width: 800px;
-  line-height: 1.5;
+  line-height: 1.6;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Hidden navigation styles */

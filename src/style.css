@@ -98,12 +98,18 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 1.5rem 1.5rem;
+  /* Increased padding */
+  min-height: calc(100vh - 200px);
+  /* Ensure container takes up available space */
 }
 
 .grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.5rem;
+  /* Increased gap */
+  margin-top: 1.5rem;
+  /* Added margin-top */
 }
 
 .grid-2 {
@@ -112,7 +118,8 @@ body {
 
 .textarea {
   width: 100%;
-  min-height: 250px;
+  min-height: 350px;
+  /* Increased from 250px to 350px */
   padding: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -380,4 +387,10 @@ header,
   .btn {
     min-width: 100px;
   }
+}
+
+h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
 }
