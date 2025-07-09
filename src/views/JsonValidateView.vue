@@ -1,18 +1,13 @@
 <template>
   <div class="container">
-    <h1>JSON Validation Tool</h1>
-    <p>Validate JSON structure and format</p>
-    
+    <p class="tool-description">Validate JSON structure and format</p>
+
     <div class="validate-container">
       <div>
         <h3>JSON Input</h3>
-        <textarea
-          v-model="jsonInput"
-          class="textarea"
-          placeholder="Enter your JSON here..."
-        ></textarea>
+        <textarea v-model="jsonInput" class="textarea" placeholder="Enter your JSON here..."></textarea>
       </div>
-      
+
       <div class="action-buttons">
         <button @click="validateJson" class="btn btn-success">
           <span class="icon">✓</span> Validate JSON
@@ -24,7 +19,7 @@
           <span class="icon">✨</span> Format
         </button>
       </div>
-      
+
       <div v-if="validationResult" :class="isValid ? 'success' : 'error'" class="validation-result">
         <div v-if="isValid">
           <h3>✓ Valid JSON</h3>
@@ -72,12 +67,12 @@ const jsonSize = computed(() => {
 const validateJson = () => {
   validationResult.value = ''
   isValid.value = false
-  
+
   if (!jsonInput.value.trim()) {
     validationResult.value = 'Please enter JSON to validate'
     return
   }
-  
+
   try {
     // Use jsonlint for more detailed validation
     jsonlint.parse(jsonInput.value)
@@ -106,7 +101,7 @@ const calculateStats = () => {
       stats.value.values++
       return
     }
-    
+
     if (Array.isArray(obj)) {
       stats.value.arrays++
       obj.forEach(item => countItems(item))
@@ -115,13 +110,13 @@ const calculateStats = () => {
       Object.values(obj).forEach(val => countItems(val))
     }
   }
-  
+
   stats.value = {
     objects: 0,
     arrays: 0,
     values: 0
   }
-  
+
   try {
     const parsed = JSON.parse(jsonInput.value)
     countItems(parsed)

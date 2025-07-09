@@ -1,23 +1,18 @@
 <template>
   <div class="container">
-    <h1>JSON Beautify/Minify Tool</h1>
-    <p>Format JSON beautifully or minify it</p>
-    
+    <p class="tool-description">Format JSON beautifully or minify it</p>
+
     <div class="grid grid-2">
       <div>
         <h3>Input JSON</h3>
-        <textarea
-          v-model="inputJson"
-          class="textarea"
-          placeholder="Enter your JSON here..."
-        ></textarea>
-        
+        <textarea v-model="inputJson" class="textarea" placeholder="Enter your JSON here..."></textarea>
+
         <div style="margin: 1rem 0;">
           <button @click="beautifyJson" class="btn">Beautify JSON</button>
           <button @click="minifyJson" class="btn btn-success">Minify JSON</button>
           <button @click="clearAll" class="btn btn-secondary">Clear</button>
         </div>
-        
+
         <div style="margin: 1rem 0;">
           <label>
             Indent Size:
@@ -30,21 +25,17 @@
           </label>
         </div>
       </div>
-      
+
       <div>
         <h3>Output</h3>
-        <textarea
-          v-model="outputJson"
-          class="textarea"
-          readonly
-          placeholder="Formatted JSON will appear here..."
-        ></textarea>
-        
+        <textarea v-model="outputJson" class="textarea" readonly
+          placeholder="Formatted JSON will appear here..."></textarea>
+
         <div style="margin: 1rem 0;">
           <button @click="copyOutput" class="btn">Copy Output</button>
           <button @click="swapInputOutput" class="btn btn-success">Swap Input/Output</button>
         </div>
-        
+
         <div v-if="jsonStats" class="card" style="text-align: left; margin-top: 1rem;">
           <h4>JSON Statistics</h4>
           <p><strong>Original Size:</strong> {{ jsonStats.originalSize }} characters</p>
@@ -56,11 +47,11 @@
         </div>
       </div>
     </div>
-    
+
     <div v-if="errorMessage" class="error">
       {{ errorMessage }}
     </div>
-    
+
     <div v-if="successMessage" class="success">
       {{ successMessage }}
     </div>
@@ -80,12 +71,12 @@ const jsonStats = ref<any>(null)
 const beautifyJson = () => {
   errorMessage.value = ''
   successMessage.value = ''
-  
+
   try {
     const parsed = JSON.parse(inputJson.value)
     const indent = indentSize.value === '\t' ? '\t' : parseInt(indentSize.value)
     outputJson.value = JSON.stringify(parsed, null, indent)
-    
+
     calculateStats(parsed)
     successMessage.value = 'JSON beautified successfully!'
   } catch (error) {
@@ -96,11 +87,11 @@ const beautifyJson = () => {
 const minifyJson = () => {
   errorMessage.value = ''
   successMessage.value = ''
-  
+
   try {
     const parsed = JSON.parse(inputJson.value)
     outputJson.value = JSON.stringify(parsed)
-    
+
     calculateStats(parsed)
     successMessage.value = 'JSON minified successfully!'
   } catch (error) {
@@ -112,11 +103,11 @@ const calculateStats = (parsed: any) => {
   const originalSize = inputJson.value.length
   const formattedSize = outputJson.value.length
   const compression = originalSize > 0 ? Math.round(((originalSize - formattedSize) / originalSize) * 100) : 0
-  
+
   let objects = 0
   let arrays = 0
   let properties = 0
-  
+
   const countElements = (obj: any) => {
     if (Array.isArray(obj)) {
       arrays++
@@ -129,9 +120,9 @@ const calculateStats = (parsed: any) => {
       })
     }
   }
-  
+
   countElements(parsed)
-  
+
   jsonStats.value = {
     originalSize,
     formattedSize,

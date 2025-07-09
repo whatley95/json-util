@@ -1,34 +1,25 @@
 <template>
   <div class="container">
-    <h1>JSON Path Finder</h1>
-    <p>Explore and extract data from complex JSON structures using JSONPath expressions</p>
-    
+    <p class="tool-description">Explore and extract data from complex JSON structures using JSONPath expressions</p>
+
     <div class="json-path-container">
       <div class="json-input-section">
         <h3>JSON Input</h3>
-        <textarea
-          v-model="jsonInput"
-          class="textarea"
-          placeholder="Paste your JSON data here..."
-        ></textarea>
+        <textarea v-model="jsonInput" class="textarea" placeholder="Paste your JSON data here..."></textarea>
         <div class="action-buttons small-buttons">
           <button @click="loadSampleData" class="btn btn-sm">Load Example</button>
           <button @click="formatJson" class="btn btn-sm btn-secondary">Format JSON</button>
         </div>
       </div>
-      
+
       <div class="query-section">
         <h3>JSONPath Query</h3>
         <div class="path-input-container">
-          <input
-            v-model="jsonPath"
-            class="path-input"
-            placeholder="Enter JSONPath expression (e.g. $.store.book[*].author)"
-            @keyup.enter="evaluatePath"
-          />
+          <input v-model="jsonPath" class="path-input"
+            placeholder="Enter JSONPath expression (e.g. $.store.book[*].author)" @keyup.enter="evaluatePath" />
           <button @click="evaluatePath" class="btn btn-success">Evaluate</button>
         </div>
-        
+
         <div class="common-paths">
           <h4>Common Paths:</h4>
           <div class="path-examples">
@@ -36,16 +27,17 @@
             <button @click="setPath('$.store.book[0]')" class="path-btn">$.store.book[0]</button>
             <button @click="setPath('$.store.book[*].author')" class="path-btn">$.store.book[*].author</button>
             <button @click="setPath('$..author')" class="path-btn">$..author</button>
-            <button @click="setPath('$.store.book[?(@.price < 10)]')" class="path-btn">$.store.book[?(@.price < 10)]</button>
-            <button @click="setPath('$..book[(@.length-1)]')" class="path-btn">$..book[(@.length-1)]</button>
+            <button @click="setPath('$.store.book[?(@.price < 10)]')" class="path-btn">$.store.book[?(@.price <
+                10)]</button>
+                <button @click="setPath('$..book[(@.length-1)]')" class="path-btn">$..book[(@.length-1)]</button>
           </div>
         </div>
       </div>
-      
+
       <div v-if="errorMessage" class="error">
         {{ errorMessage }}
       </div>
-      
+
       <div class="result-section" v-if="pathResult">
         <h3>Results</h3>
         <div class="result-info">
@@ -57,7 +49,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="help-section card">
       <h3>JSONPath Syntax Guide</h3>
       <table class="syntax-table">
@@ -127,17 +119,17 @@ const errorMessage = ref('')
 function evaluatePath() {
   errorMessage.value = ''
   pathResult.value = null
-  
+
   if (!jsonInput.value.trim()) {
     errorMessage.value = 'Please enter JSON data'
     return
   }
-  
+
   if (!jsonPath.value.trim()) {
     errorMessage.value = 'Please enter a JSONPath expression'
     return
   }
-  
+
   try {
     const jsonData = JSON.parse(jsonInput.value)
     const result = jsonPathQuery(jsonData, jsonPath.value)
@@ -152,32 +144,32 @@ function jsonPathQuery(obj: any, path: string): any[] {
   try {
     // Implementation of a simple JSONPath query function
     // This is a simplified version that works for basic paths
-    
+
     // Handle the root element
     if (path === '$') {
       return [obj]
     }
-    
+
     // Handle basic property access ($.property)
     if (path.startsWith('$.') && !path.includes('[') && !path.includes('..')) {
       const props = path.substring(2).split('.')
       let current = obj
-      
+
       for (const prop of props) {
         if (current === undefined || current === null) {
           return []
         }
         current = current[prop]
       }
-      
+
       return current === undefined ? [] : [current]
     }
-    
+
     // Handle array index access ($.array[0])
     if (path.includes('[') && path.includes(']')) {
       const pathParts = path.substring(2).split('[')
       let current = obj
-      
+
       // Get to the array
       if (pathParts[0]) {
         const props = pathParts[0].split('.')
@@ -189,24 +181,24 @@ function jsonPathQuery(obj: any, path: string): any[] {
           current = current[prop]
         }
       }
-      
+
       // Extract the index from "[index]"
       const indexStr = pathParts[1].substring(0, pathParts[1].length - 1)
       const index = parseInt(indexStr)
-      
+
       if (Array.isArray(current) && !isNaN(index)) {
         return current[index] === undefined ? [] : [current[index]]
       }
-      
+
       return []
     }
-    
+
     // Handle wildcard for array elements ($.array[*].property)
     if (path.includes('[*]')) {
       const parts = path.split('[*]')
       const beforeWildcard = parts[0].substring(2)
       const afterWildcard = parts[1] ? parts[1].substring(1) : ''
-      
+
       let current = obj
       if (beforeWildcard) {
         const props = beforeWildcard.split('.')
@@ -218,15 +210,15 @@ function jsonPathQuery(obj: any, path: string): any[] {
           current = current[prop]
         }
       }
-      
+
       if (!Array.isArray(current)) {
         return []
       }
-      
+
       if (!afterWildcard) {
         return current
       }
-      
+
       // Process each item in the array with the remaining path
       const results: any[] = []
       for (const item of current) {
@@ -243,14 +235,14 @@ function jsonPathQuery(obj: any, path: string): any[] {
           results.push(value)
         }
       }
-      
+
       return results
     }
-    
+
     // For more complex paths, show error - we'd need a full JSONPath library
     // for proper implementation of recursive descent, filters, etc.
     throw new Error('Complex JSONPath expressions require a full JSONPath library. Try simpler paths or check the examples.')
-    
+
   } catch (error) {
     console.error('JSONPath evaluation error', error)
     throw new Error('Error evaluating JSONPath: ' + (error instanceof Error ? error.message : String(error)))
@@ -279,7 +271,7 @@ function formatJson() {
 
 function copyResultToClipboard() {
   if (!pathResult.value) return
-  
+
   try {
     navigator.clipboard.writeText(formattedResult.value)
   } catch (error) {
@@ -478,11 +470,11 @@ function loadSampleData() {
   .path-input-container {
     flex-direction: column;
   }
-  
+
   .syntax-table {
     font-size: 0.8rem;
   }
-  
+
   .syntax-table th,
   .syntax-table td {
     padding: 0.5rem;

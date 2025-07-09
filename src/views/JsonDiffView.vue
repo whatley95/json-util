@@ -1,8 +1,7 @@
 <template>
   <div class="container">
-    <h1>JSON Diff Tool</h1>
-    <p>Compare two JSON objects and see the differences</p>
-    
+    <p class="tool-description">Compare two JSON objects and see the differences</p>
+
     <div class="diff-options">
       <div>
         <label>View Mode:</label>
@@ -19,35 +18,29 @@
         </select>
       </div>
     </div>
-    
+
     <div class="grid grid-2">
       <div class="json-input-container">
         <h3>Original JSON</h3>
-        <textarea
-          v-model="originalJson"
-          class="textarea json-input"
-          placeholder="Enter your original JSON here..."
-        ></textarea>
+        <textarea v-model="originalJson" class="textarea json-input"
+          placeholder="Enter your original JSON here..."></textarea>
         <div class="sample-buttons">
           <button @click="loadSimpleExample" class="btn btn-sm">Load Example</button>
           <button @click="formatJson('original')" class="btn btn-sm btn-secondary">Format</button>
         </div>
       </div>
-      
+
       <div class="json-input-container">
         <h3>Modified JSON</h3>
-        <textarea
-          v-model="modifiedJson"
-          class="textarea json-input"
-          placeholder="Enter your modified JSON here..."
-        ></textarea>
+        <textarea v-model="modifiedJson" class="textarea json-input"
+          placeholder="Enter your modified JSON here..."></textarea>
         <div class="sample-buttons">
           <button @click="loadModifiedExample" class="btn btn-sm">Load Example</button>
           <button @click="formatJson('modified')" class="btn btn-sm btn-secondary">Format</button>
         </div>
       </div>
     </div>
-    
+
     <div class="action-buttons">
       <button @click="compareJson" class="btn btn-lg">
         <span class="icon">🔍</span> Compare JSON
@@ -59,11 +52,11 @@
         <span class="icon">↔️</span> Swap
       </button>
     </div>
-    
+
     <div v-if="errorMessage" class="error">
       {{ errorMessage }}
     </div>
-    
+
     <div v-if="diffResult" class="card diff-result-container">
       <h3>Differences</h3>
       <div class="diff-view" ref="diffContainer"></div>
@@ -94,24 +87,24 @@ watch([viewMode, outputFormat], () => {
 const compareJson = () => {
   errorMessage.value = ''
   diffResult.value = ''
-  
+
   try {
     // Parse and format both JSONs
     const original = originalJson.value ? JSON.parse(originalJson.value) : {}
     const modified = modifiedJson.value ? JSON.parse(modifiedJson.value) : {}
-    
+
     // Generate a unified diff
-    const originalStr = outputFormat.value === 'formatted' 
-      ? JSON.stringify(original, null, 2) 
+    const originalStr = outputFormat.value === 'formatted'
+      ? JSON.stringify(original, null, 2)
       : JSON.stringify(original)
-    const modifiedStr = outputFormat.value === 'formatted' 
-      ? JSON.stringify(modified, null, 2) 
+    const modifiedStr = outputFormat.value === 'formatted'
+      ? JSON.stringify(modified, null, 2)
       : JSON.stringify(modified)
-    
+
     // Create a unified diff string
     const diff = createUnifiedDiff(originalStr, modifiedStr)
     diffResult.value = diff
-    
+
     // Render the diff using diff2html
     renderDiff()
   } catch (error) {
@@ -122,27 +115,27 @@ const compareJson = () => {
 const createUnifiedDiff = (originalStr: string, modifiedStr: string): string => {
   const originalLines = originalStr.split('\n')
   const modifiedLines = modifiedStr.split('\n')
-  
+
   let diffStr = '--- a/original.json\n'
   diffStr += '+++ b/modified.json\n'
   diffStr += '@@ -1,' + originalLines.length + ' +1,' + modifiedLines.length + ' @@\n'
-  
+
   // Add all lines from original with - prefix
   originalLines.forEach(line => {
     diffStr += '-' + line + '\n'
   })
-  
+
   // Add all lines from modified with + prefix
   modifiedLines.forEach(line => {
     diffStr += '+' + line + '\n'
   })
-  
+
   return diffStr
 }
 
 const renderDiff = () => {
   if (!diffContainer.value) return
-  
+
   const configuration = {
     drawFileList: false,
     matching: 'lines',
@@ -150,7 +143,7 @@ const renderDiff = () => {
     highlight: true,
     fileContentToggle: false,
   }
-  
+
   const diffHtml = Diff2Html.html(diffResult.value, configuration)
   diffContainer.value.innerHTML = diffHtml
 }

@@ -1,8 +1,7 @@
 <template>
   <div class="container">
-    <h1>JSON Utilities</h1>
-    <p>A comprehensive tool for working with JSON data</p>
-    
+    <p class="tool-description">A comprehensive tool for working with JSON data</p>
+
     <div class="tools-grid">
       <div class="card tool-card">
         <div class="tool-icon">🔄</div>
@@ -10,35 +9,35 @@
         <p>Compare two JSON objects and see the differences highlighted</p>
         <router-link to="/diff" class="btn">Try JSON Diff</router-link>
       </div>
-      
+
       <div class="card tool-card">
         <div class="tool-icon">🔒</div>
         <h3>Escape/Unescape</h3>
         <p>Escape special characters in JSON strings or unescape them</p>
         <router-link to="/escape" class="btn">Try Escape Tool</router-link>
       </div>
-      
+
       <div class="card tool-card">
         <div class="tool-icon">✨</div>
         <h3>Beautify/Minify</h3>
         <p>Format JSON beautifully with indentation or minify to save space</p>
         <router-link to="/beautify" class="btn">Try Beautify Tool</router-link>
       </div>
-      
+
       <div class="card tool-card">
         <div class="tool-icon">🔄</div>
         <h3>Object Converter</h3>
         <p>Convert between JSON strings and JavaScript objects</p>
         <router-link to="/converter" class="btn">Try Converter</router-link>
       </div>
-      
+
       <div class="card tool-card">
         <div class="tool-icon">✓</div>
         <h3>JSON Validate</h3>
         <p>Validate JSON structure and syntax with detailed error messages</p>
         <router-link to="/validate" class="btn">Try Validator</router-link>
       </div>
-      
+
       <div class="card tool-card">
         <div class="tool-icon">🔍</div>
         <h3>JSON Path Finder</h3>
@@ -95,7 +94,9 @@ h1 {
   margin-bottom: 0.5rem;
   background: linear-gradient(90deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 h3 {
@@ -103,7 +104,7 @@ h3 {
   font-size: 1.5rem;
 }
 
-.container > p {
+.container>p {
   font-size: 1.2rem;
   color: var(--text-muted);
   max-width: 600px;

@@ -1,53 +1,44 @@
 <template>
   <div class="container">
-    <h1>JSON ⇄ Object Converter</h1>
-    <p>Convert between JSON strings and JavaScript objects</p>
-    
+    <p class="tool-description">Convert between JSON strings and JavaScript objects</p>
+
     <div class="grid grid-2">
       <div>
         <h3>JSON String</h3>
-        <textarea
-          v-model="jsonString"
-          class="textarea"
-          placeholder="Enter JSON string here..."
-        ></textarea>
-        
+        <textarea v-model="jsonString" class="textarea" placeholder="Enter JSON string here..."></textarea>
+
         <div style="margin: 1rem 0;">
           <button @click="jsonToObject" class="btn">JSON → Object</button>
           <button @click="clearJson" class="btn btn-secondary">Clear JSON</button>
         </div>
       </div>
-      
+
       <div>
         <h3>JavaScript Object</h3>
-        <textarea
-          v-model="jsObject"
-          class="textarea"
-          placeholder="Enter JavaScript object here..."
-        ></textarea>
-        
+        <textarea v-model="jsObject" class="textarea" placeholder="Enter JavaScript object here..."></textarea>
+
         <div style="margin: 1rem 0;">
           <button @click="objectToJson" class="btn">Object → JSON</button>
           <button @click="clearObject" class="btn btn-secondary">Clear Object</button>
         </div>
       </div>
     </div>
-    
+
     <div style="margin: 1rem 0;">
       <button @click="validateJson" class="btn btn-success">Validate JSON</button>
       <button @click="copyJsonString" class="btn">Copy JSON</button>
       <button @click="copyJsObject" class="btn">Copy Object</button>
       <button @click="clearAll" class="btn btn-danger">Clear All</button>
     </div>
-    
+
     <div v-if="errorMessage" class="error">
       {{ errorMessage }}
     </div>
-    
+
     <div v-if="successMessage" class="success">
       {{ successMessage }}
     </div>
-    
+
     <div v-if="validationResult" class="card">
       <h3>Validation Result</h3>
       <div v-if="validationResult.valid" class="success">
@@ -56,17 +47,18 @@
       <div v-else class="error">
         ❌ Invalid JSON: {{ validationResult.error }}
       </div>
-      
+
       <div v-if="validationResult.valid && validationResult.info" style="margin-top: 1rem; text-align: left;">
         <h4>JSON Information</h4>
         <p><strong>Type:</strong> {{ validationResult.info.type }}</p>
         <p><strong>Size:</strong> {{ validationResult.info.size }} characters</p>
         <p v-if="validationResult.info.keys"><strong>Keys:</strong> {{ validationResult.info.keys.join(', ') }}</p>
-        <p v-if="validationResult.info.length !== undefined"><strong>Array Length:</strong> {{ validationResult.info.length }}</p>
+        <p v-if="validationResult.info.length !== undefined"><strong>Array Length:</strong> {{
+          validationResult.info.length }}</p>
         <p><strong>Depth:</strong> {{ validationResult.info.depth }} levels</p>
       </div>
     </div>
-    
+
     <div class="card" style="text-align: left;">
       <h3>Sample Data</h3>
       <p>Try these sample JSON objects:</p>
@@ -139,7 +131,7 @@ const sampleData = {
 const jsonToObject = () => {
   errorMessage.value = ''
   successMessage.value = ''
-  
+
   try {
     const parsed = JSON.parse(jsonString.value)
     jsObject.value = JSON.stringify(parsed, null, 2)
@@ -152,7 +144,7 @@ const jsonToObject = () => {
 const objectToJson = () => {
   errorMessage.value = ''
   successMessage.value = ''
-  
+
   try {
     // Try to evaluate as JavaScript object literal
     const obj = eval(`(${jsObject.value})`)
@@ -173,16 +165,16 @@ const objectToJson = () => {
 const validateJson = () => {
   errorMessage.value = ''
   successMessage.value = ''
-  
+
   if (!jsonString.value.trim()) {
     errorMessage.value = 'Please enter JSON to validate'
     return
   }
-  
+
   try {
     const parsed = JSON.parse(jsonString.value)
     const info = analyzeJson(parsed)
-    
+
     validationResult.value = {
       valid: true,
       info
@@ -201,10 +193,10 @@ const analyzeJson = (obj: any) => {
     if (value === null) return 'null'
     return typeof value
   }
-  
+
   const getDepth = (obj: any, currentDepth = 1): number => {
     if (typeof obj !== 'object' || obj === null) return currentDepth
-    
+
     let maxDepth = currentDepth
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
@@ -214,23 +206,23 @@ const analyzeJson = (obj: any) => {
     }
     return maxDepth
   }
-  
+
   const type = getType(obj)
   const size = jsonString.value.length
   const depth = getDepth(obj)
-  
+
   const info: any = {
     type,
     size,
     depth
   }
-  
+
   if (type === 'object') {
     info.keys = Object.keys(obj)
   } else if (type === 'array') {
     info.length = obj.length
   }
-  
+
   return info
 }
 
