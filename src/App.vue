@@ -1,61 +1,88 @@
 <template>
   <div id="app">
-    <header>
-      <h1 class="app-title">JSON Utilities</h1>
-      <div class="theme-toggle">
-        <button @click="toggleTheme" class="theme-btn">
-          {{ isDarkTheme ? '☀️' : '🌙' }}
-        </button>
-      </div>
-    </header>
-    
-    <nav class="nav">
-      <router-link to="/" class="nav-link">
-        <span class="icon">🏠</span> Home
-      </router-link>
-      <router-link to="/diff" class="nav-link">
-        <span class="icon">🔄</span> JSON Diff
-      </router-link>
-      <router-link to="/escape" class="nav-link">
-        <span class="icon">🔒</span> Escape/Unescape
-      </router-link>
-      <router-link to="/beautify" class="nav-link">
-        <span class="icon">✨</span> Beautify/Minify
-      </router-link>
-      <router-link to="/converter" class="nav-link">
-        <span class="icon">🔄</span> Object Converter
-      </router-link>
-      <router-link to="/validate" class="nav-link">
-        <span class="icon">✓</span> Validate
-      </router-link>
-      <router-link to="/path" class="nav-link">
-        <span class="icon">🔍</span> JSONPath
-      </router-link>
-    </nav>
-    
+    <div class="fixed-nav-container">
+      <header>
+        <h1 class="app-title">JSON Utilities</h1>
+        <div class="header-controls">
+          <button @click="toggleMenu" class="menu-btn mobile-only">
+            <span class="menu-icon"></span>
+          </button>
+          <div class="theme-toggle">
+            <button @click="toggleTheme" class="theme-btn">
+              {{ isDarkTheme ? '☀️' : '🌙' }}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <nav class="nav" :class="{ 'menu-open': isMenuOpen }">
+        <div class="nav-container">
+          <router-link to="/" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">🏠</span> Home
+          </router-link>
+          <router-link to="/diff" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">🔄</span> JSON Diff
+          </router-link>
+          <router-link to="/escape" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">🔒</span> Escape/Unescape
+          </router-link>
+          <router-link to="/beautify" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">✨</span> Beautify/Minify
+          </router-link>
+          <router-link to="/converter" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">🔄</span> Object Converter
+          </router-link>
+          <router-link to="/validate" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">✓</span> Validate
+          </router-link>
+          <router-link to="/path" class="nav-link" @click="isMenuOpen = false">
+            <span class="icon">🔍</span> JSONPath
+          </router-link>
+        </div>
+      </nav>
+
+      <div class="nav-shadow" v-if="scrolled"></div>
+    </div>
+
     <main class="main-content">
       <router-view />
     </main>
-    
+
     <footer class="footer">
       <p>JSON Utilities - A comprehensive tool for JSON operations</p>
-      <p class="copyright">© 2025 <a href="https://whatley.xyz/" target="_blank" rel="noopener" class="footer-link">Whatley</a></p>
+      <p class="copyright">© 2025 <a href="https://whatley.xyz/playground" target="_blank" rel="noopener"
+          class="footer-link">Whatley</a></p>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 // Theme handling
 const isDarkTheme = ref(true);
+// Menu state for mobile
+const isMenuOpen = ref(false);
+// Scroll state for shadow effect
+const scrolled = ref(false);
 
 function toggleTheme() {
   isDarkTheme.value = !isDarkTheme.value;
   document.documentElement.classList.toggle('light-theme');
-  
+
   // Save theme preference
   localStorage.setItem('theme', isDarkTheme.value ? 'dark' : 'light');
+}
+
+function toggleMenu() {
+  isMenuOpen.value = !isMenuOpen.value;
+  // Prevent body scrolling when menu is open on mobile
+  document.body.style.overflow = isMenuOpen.value ? 'hidden' : '';
+}
+
+// Handle scroll events to add shadow and effects
+function handleScroll() {
+  scrolled.value = window.scrollY > 10;
 }
 
 onMounted(() => {
@@ -65,6 +92,16 @@ onMounted(() => {
     isDarkTheme.value = false;
     document.documentElement.classList.add('light-theme');
   }
+
+  // Add scroll event listener
+  window.addEventListener('scroll', handleScroll);
+  // Initial check
+  handleScroll();
+});
+
+onUnmounted(() => {
+  // Clean up scroll event listener
+  window.removeEventListener('scroll', handleScroll);
 });
 </script>
 
@@ -98,6 +135,7 @@ header {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -110,7 +148,9 @@ header {
   margin: 0;
   background: linear-gradient(90deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: transparent;
   letter-spacing: 1px;
   position: relative;
   text-shadow: 0 2px 10px rgba(67, 97, 238, 0.2);
@@ -160,6 +200,7 @@ header {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -199,14 +240,40 @@ header {
   font-size: 0.8rem;
 }
 
+.fixed-nav-container {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  width: 100%;
+}
+
+.nav-shadow {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .nav {
   overflow-x: auto;
   padding: 0.75rem;
   white-space: nowrap;
   margin-bottom: 2rem;
   background: linear-gradient(to right, var(--surface), rgba(15, 52, 96, 0.9));
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .nav::-webkit-scrollbar {
@@ -225,6 +292,19 @@ header {
 
 .nav-link {
   position: relative;
+  margin: 0 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.router-link-active {
+  background: rgba(var(--primary-rgb), 0.15);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
 }
 
 .nav-link::after {
@@ -251,23 +331,108 @@ header {
   opacity: 1;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-only {
+  display: none;
+}
+
+.menu-btn {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  position: relative;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.menu-icon,
+.menu-icon::before,
+.menu-icon::after {
+  position: absolute;
+  width: 24px;
+  height: 3px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.menu-icon {
+  top: 14px;
+  left: 4px;
+}
+
+.menu-icon::before {
+  content: '';
+  top: -8px;
+  left: 0;
+}
+
+.menu-icon::after {
+  content: '';
+  top: 8px;
+  left: 0;
+}
+
+.menu-open .menu-icon {
+  background: transparent;
+}
+
+.menu-open .menu-icon::before {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-open .menu-icon::after {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
 @media (max-width: 768px) {
   header {
     padding: 1rem;
   }
-  
+
   .app-title {
     font-size: 1.5rem;
   }
-  
-  .nav {
-    padding: 0.5rem;
-    margin-bottom: 1.5rem;
+
+  .mobile-only {
+    display: block;
   }
-  
+
+  .nav {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    transition: height 0.3s ease;
+    border-radius: 0;
+    z-index: 300;
+  }
+
+  .nav.menu-open {
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding: 1rem;
+  }
+
+  .nav-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .nav-link {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    padding: 1rem;
+    font-size: 1.1rem;
+    text-align: left;
   }
 }
 </style>

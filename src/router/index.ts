@@ -9,7 +9,8 @@ import JsonValidateView from '../views/JsonValidateView.vue'
 import JsonPathView from '../views/JsonPathView.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
+  // Use the correct base URL matching Vite's configuration
+  history: createWebHistory('/json-util/'),
   routes: [
     {
       path: '/',
@@ -45,6 +46,10 @@ const router = createRouter({
       path: '/path',
       name: 'path',
       component: JsonPathView
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })

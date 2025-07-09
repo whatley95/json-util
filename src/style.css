@@ -13,9 +13,11 @@
 
   /* Dark Theme colors */
   --primary: #4361ee;
-  --primary-hover: #3a56d4;
+  --primary-rgb: 67, 97, 238;
   --secondary: #3f8cff;
+  --secondary-rgb: 63, 140, 255;
   --accent: #4cc9f0;
+  --accent-rgb: 76, 201, 240;
   --success: #4ade80;
   --warning: #fbbf24;
   --danger: #f87171;
@@ -37,9 +39,11 @@
   background-color: #f8f9fa;
 
   --primary: #3b5ccc;
-  --primary-hover: #2a4ba8;
+  --primary-rgb: 59, 92, 204;
   --secondary: #3472d8;
+  --secondary-rgb: 52, 114, 216;
   --accent: #23a6d5;
+  --accent-rgb: 35, 166, 213;
   --success: #2e9a5f;
   --warning: #d99c17;
   --danger: #d85a5a;
