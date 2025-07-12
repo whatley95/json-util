@@ -24,7 +24,14 @@
           <span class="toggle-slider"></span>
         </div>
       </div>
+      <div>
+        <button @click="showHistory = !showHistory" class="btn btn-sm" :class="{ 'btn-primary': showHistory }">
+          <span class="icon">⏱</span> History
+        </button>
+      </div>
     </div>
+
+    <HistoryPanel v-if="showHistory" toolName="diff" @select="loadHistoryItem" />
 
     <div class="grid grid-2">
       <div class="json-input-container">
@@ -76,6 +83,8 @@
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import * as Diff2Html from 'diff2html'
 import 'diff2html/bundles/css/diff2html.min.css'
+import HistoryPanel from '../components/HistoryPanel.vue'
+import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
 const originalJson = ref('')
 const modifiedJson = ref('')
@@ -86,6 +95,7 @@ const viewMode = ref('side-by-side')
 const outputFormat = ref('formatted')
 const autoCompareEnabled = ref(true) // Enable auto-compare by default
 const debounceTimer = ref(null as number | null)
+const showHistory = ref(false) // Toggle history panel visibility
 
 // Watch for changes in view mode to rerender diff if needed
 watch([viewMode, outputFormat], () => {
@@ -157,6 +167,9 @@ const compareJson = () => {
 
     // Render the diff using diff2html
     renderDiff()
+
+    // Save to history if successful
+    saveCurrentToHistory()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Invalid JSON format. Please check your input.'
   }
@@ -280,13 +293,74 @@ const handleKeyboardShortcut = (event: KeyboardEvent) => {
   }
 }
 
-// Register and unregister keyboard shortcuts
+// Save to history when a successful comparison is made
+function saveCurrentToHistory() {
+  if (originalJson.value && modifiedJson.value && !errorMessage.value) {
+    const timestamp = new Date().toLocaleTimeString();
+    const label = `Comparison at ${timestamp}`;
+
+    // Save to history, skipping duplicates
+    saveToHistory('diff', label, {
+      originalJson: originalJson.value,
+      modifiedJson: modifiedJson.value,
+      viewMode: viewMode.value,
+      outputFormat: outputFormat.value
+    }, true); // true = skip duplicates
+  }
+}
+
+// Load history item
+function loadHistoryItem(item: HistoryItem) {
+  const data = item.data;
+  originalJson.value = data.originalJson;
+  modifiedJson.value = data.modifiedJson;
+  viewMode.value = data.viewMode;
+  outputFormat.value = data.outputFormat;
+
+  // Hide history panel after loading
+  showHistory.value = false;
+
+  // Trigger comparison
+  compareJson();
+}
+
+// Save current state to localStorage when component unmounts
+function saveState() {
+  saveToolState('diff', {
+    originalJson: originalJson.value,
+    modifiedJson: modifiedJson.value,
+    viewMode: viewMode.value,
+    outputFormat: outputFormat.value,
+    autoCompareEnabled: autoCompareEnabled.value
+  });
+}
+
+// Load previous state if available
+function loadPreviousState() {
+  const state = getToolState('diff');
+  if (state) {
+    originalJson.value = state.originalJson || '';
+    modifiedJson.value = state.modifiedJson || '';
+    viewMode.value = state.viewMode || 'side-by-side';
+    outputFormat.value = state.outputFormat || 'formatted';
+    autoCompareEnabled.value = state.autoCompareEnabled !== undefined ? state.autoCompareEnabled : true;
+
+    // Only compare if both JSON inputs exist
+    if (originalJson.value && modifiedJson.value) {
+      compareJson();
+    }
+  }
+}
+
+// Register and unregister keyboard shortcuts, load previous state, save state on unmount
 onMounted(() => {
-  document.addEventListener('keydown', handleKeyboardShortcut)
+  document.addEventListener('keydown', handleKeyboardShortcut);
+  loadPreviousState();
 })
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyboardShortcut)
+  document.removeEventListener('keydown', handleKeyboardShortcut);
+  saveState();
 })
 </script>
 
@@ -295,8 +369,8 @@ onUnmounted(() => {
   display: flex;
   gap: 1.25rem;
   /* Increased from 1rem */
-  margin-bottom: 2rem;
-  /* Increased from 1.5rem */
+  margin-bottom: 1rem;
+  /* Reduced to accommodate history panel */
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;

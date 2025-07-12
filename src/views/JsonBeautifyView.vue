@@ -2,6 +2,14 @@
   <div class="container">
     <p class="tool-description">Format JSON beautifully or minify it</p>
 
+    <div class="options-bar">
+      <button @click="showHistory = !showHistory" class="btn btn-sm" :class="{ 'btn-primary': showHistory }">
+        <span class="icon">⏱</span> History
+      </button>
+    </div>
+
+    <HistoryPanel v-if="showHistory" toolName="beautify" @select="loadHistoryItem" />
+
     <div class="grid grid-2">
       <div>
         <h3>Input JSON</h3>
@@ -59,7 +67,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import HistoryPanel from '../components/HistoryPanel.vue'
+import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
 const inputJson = ref('')
 const outputJson = ref('')
@@ -67,6 +77,7 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const indentSize = ref('2')
 const jsonStats = ref<any>(null)
+const showHistory = ref(false) // Toggle history panel visibility
 
 const beautifyJson = () => {
   errorMessage.value = ''
@@ -79,6 +90,9 @@ const beautifyJson = () => {
 
     calculateStats(parsed)
     successMessage.value = 'JSON beautified successfully!'
+
+    // Save to history
+    saveCurrentToHistory('Beautify')
   } catch (error) {
     errorMessage.value = 'Invalid JSON format. Please check your input.'
   }
@@ -94,6 +108,9 @@ const minifyJson = () => {
 
     calculateStats(parsed)
     successMessage.value = 'JSON minified successfully!'
+
+    // Save to history
+    saveCurrentToHistory('Minify')
   } catch (error) {
     errorMessage.value = 'Invalid JSON format. Please check your input.'
   }
@@ -145,6 +162,12 @@ const copyOutput = async () => {
   try {
     await navigator.clipboard.writeText(outputJson.value)
     successMessage.value = 'Output copied to clipboard!'
+
+    // Save to history when copying, as it might be valuable to the user
+    if (inputJson.value && outputJson.value) {
+      saveCurrentToHistory('Copy')
+    }
+
     setTimeout(() => {
       successMessage.value = ''
     }, 2000)
@@ -163,4 +186,70 @@ const swapInputOutput = () => {
     successMessage.value = ''
   }, 2000)
 }
+
+// Save to history when a successful beautify or minify operation is completed
+function saveCurrentToHistory(actionType: string) {
+  if (inputJson.value && outputJson.value && !errorMessage.value) {
+    const timestamp = new Date().toLocaleTimeString();
+    const label = `${actionType} at ${timestamp}`;
+
+    // Save to history, skipping duplicates
+    saveToHistory('beautify', label, {
+      inputJson: inputJson.value,
+      outputJson: outputJson.value,
+      indentSize: indentSize.value,
+      stats: jsonStats.value
+    }, true); // true = skip duplicates
+  }
+}
+
+// Load history item
+function loadHistoryItem(item: HistoryItem) {
+  const data = item.data;
+  inputJson.value = data.inputJson;
+  outputJson.value = data.outputJson;
+  indentSize.value = data.indentSize;
+  jsonStats.value = data.stats;
+
+  // Hide history panel after loading
+  showHistory.value = false;
+}
+
+// Save current state to localStorage when component unmounts
+function saveState() {
+  saveToolState('beautify', {
+    inputJson: inputJson.value,
+    outputJson: outputJson.value,
+    indentSize: indentSize.value
+  });
+}
+
+// Load previous state if available
+function loadPreviousState() {
+  const state = getToolState('beautify');
+  if (state) {
+    inputJson.value = state.inputJson || '';
+    outputJson.value = state.outputJson || '';
+    indentSize.value = state.indentSize || '2';
+
+    // Recalculate stats if both input and output exist
+    if (inputJson.value && outputJson.value) {
+      try {
+        const parsed = JSON.parse(inputJson.value);
+        calculateStats(parsed);
+      } catch (error) {
+        // Ignore errors when loading previous state
+      }
+    }
+  }
+}
+
+// Register and unregister lifecycle hooks
+onMounted(() => {
+  loadPreviousState();
+});
+
+onUnmounted(() => {
+  saveState();
+});
 </script>

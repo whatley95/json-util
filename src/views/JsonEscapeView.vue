@@ -2,6 +2,14 @@
   <div class="container">
     <p class="tool-description">Escape or unescape JSON strings</p>
 
+    <div class="options-bar">
+      <button @click="showHistory = !showHistory" class="btn btn-sm" :class="{ 'btn-primary': showHistory }">
+        <span class="icon">⏱</span> History
+      </button>
+    </div>
+
+    <HistoryPanel v-if="showHistory" toolName="escape" @select="loadHistoryItem" />
+
     <div class="grid grid-2">
       <div>
         <h3>Input</h3>
@@ -36,12 +44,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import HistoryPanel from '../components/HistoryPanel.vue'
+import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
 const inputText = ref('')
 const outputText = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+const showHistory = ref(false)
 
 const escapeJson = () => {
   errorMessage.value = ''
@@ -50,6 +61,9 @@ const escapeJson = () => {
   try {
     outputText.value = JSON.stringify(inputText.value)
     successMessage.value = 'JSON escaped successfully!'
+
+    // Save to history
+    saveCurrentToHistory('Escape')
   } catch (error) {
     errorMessage.value = 'Error escaping JSON'
   }
@@ -62,6 +76,9 @@ const unescapeJson = () => {
   try {
     outputText.value = JSON.parse(inputText.value)
     successMessage.value = 'JSON unescaped successfully!'
+
+    // Save to history
+    saveCurrentToHistory('Unescape')
   } catch (error) {
     errorMessage.value = 'Invalid JSON format. Cannot unescape.'
   }
@@ -96,4 +113,60 @@ const swapInputOutput = () => {
     successMessage.value = ''
   }, 2000)
 }
+
+// Save to history when a successful operation is completed
+function saveCurrentToHistory(actionType: string) {
+  if (inputText.value && outputText.value && !errorMessage.value) {
+    const timestamp = new Date().toLocaleTimeString();
+    const label = `${actionType} at ${timestamp}`;
+
+    // Save to history, skipping duplicates
+    saveToHistory('escape', label, {
+      inputText: inputText.value,
+      outputText: outputText.value,
+      operation: actionType
+    }, true); // true = skip duplicates
+  }
+}
+
+// Load history item
+function loadHistoryItem(item: HistoryItem) {
+  const data = item.data;
+  inputText.value = data.inputText;
+  outputText.value = data.outputText;
+
+  // Hide history panel after loading
+  showHistory.value = false;
+
+  successMessage.value = 'History item loaded!';
+  setTimeout(() => {
+    successMessage.value = '';
+  }, 2000);
+}
+
+// Save current state to localStorage when component unmounts
+function saveState() {
+  saveToolState('escape', {
+    inputText: inputText.value,
+    outputText: outputText.value
+  });
+}
+
+// Load previous state if available
+function loadPreviousState() {
+  const state = getToolState('escape');
+  if (state) {
+    inputText.value = state.inputText || '';
+    outputText.value = state.outputText || '';
+  }
+}
+
+// Register and unregister lifecycle hooks
+onMounted(() => {
+  loadPreviousState();
+});
+
+onUnmounted(() => {
+  saveState();
+});
 </script>

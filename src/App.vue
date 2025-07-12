@@ -61,6 +61,11 @@
 
     <footer class="footer">
       <p>JSON Utilities - A comprehensive tool for JSON operations</p>
+      <div class="footer-actions">
+        <button @click="clearAllHistories" class="footer-button" title="Clear all saved histories">
+          Clear All History
+        </button>
+      </div>
       <p class="copyright">© 2025 <a href="https://whatley.xyz/playground" target="_blank" rel="noopener"
           class="footer-link">Whatley</a></p>
     </footer>
@@ -70,6 +75,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { clearAllHistory } from './utils/localStorage';
 
 // Theme handling
 const isDarkTheme = ref(true);
@@ -131,6 +137,14 @@ function toggleFullscreen() {
 // Toggle navigation visibility in fullscreen mode
 function toggleNavInFullscreen() {
   showNavInFullscreen.value = !showNavInFullscreen.value;
+}
+
+// Clear all histories from all tools
+function clearAllHistories() {
+  if (confirm('Are you sure you want to clear all history for all tools?')) {
+    clearAllHistory();
+    alert('All history has been cleared');
+  }
 }
 
 // Handle fullscreen change events
@@ -405,6 +419,29 @@ header {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(4px);
+}
+
+.footer-actions {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.footer-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.footer-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  transform: translateY(-1px);
 }
 
 .footer-link {

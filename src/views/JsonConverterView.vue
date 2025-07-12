@@ -2,6 +2,14 @@
   <div class="container">
     <p class="tool-description">Convert between JSON strings and JavaScript objects</p>
 
+    <div class="options-bar">
+      <button @click="showHistory = !showHistory" class="btn btn-sm" :class="{ 'btn-primary': showHistory }">
+        <span class="icon">⏱</span> History
+      </button>
+    </div>
+
+    <HistoryPanel v-if="showHistory" toolName="converter" @select="loadHistoryItem" />
+
     <div class="grid grid-2">
       <div>
         <h3>JSON String</h3>
@@ -73,13 +81,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import HistoryPanel from '../components/HistoryPanel.vue'
+import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
 const jsonString = ref('')
 const jsObject = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const validationResult = ref<any>(null)
+const showHistory = ref(false)
 
 const sampleData = {
   simple: {
@@ -136,6 +147,9 @@ const jsonToObject = () => {
     const parsed = JSON.parse(jsonString.value)
     jsObject.value = JSON.stringify(parsed, null, 2)
     successMessage.value = 'JSON converted to object successfully!'
+
+    // Save to history
+    saveCurrentToHistory('JSON to Object')
   } catch (error) {
     errorMessage.value = 'Invalid JSON format. Cannot convert to object.'
   }
@@ -150,12 +164,18 @@ const objectToJson = () => {
     const obj = eval(`(${jsObject.value})`)
     jsonString.value = JSON.stringify(obj)
     successMessage.value = 'Object converted to JSON successfully!'
+
+    // Save to history
+    saveCurrentToHistory('Object to JSON')
   } catch (error) {
     try {
       // Try to parse as JSON
       const parsed = JSON.parse(jsObject.value)
       jsonString.value = JSON.stringify(parsed)
       successMessage.value = 'Object converted to JSON successfully!'
+
+      // Save to history
+      saveCurrentToHistory('Object to JSON')
     } catch (e) {
       errorMessage.value = 'Invalid object format. Cannot convert to JSON.'
     }
@@ -179,6 +199,9 @@ const validateJson = () => {
       valid: true,
       info
     }
+
+    // Save to history
+    saveCurrentToHistory('Validate')
   } catch (error) {
     validationResult.value = {
       valid: false,
@@ -279,4 +302,60 @@ const clearAll = () => {
   successMessage.value = ''
   validationResult.value = null
 }
+
+// Save to history when a successful operation is completed
+function saveCurrentToHistory(actionType: string) {
+  if ((jsonString.value || jsObject.value) && !errorMessage.value) {
+    const timestamp = new Date().toLocaleTimeString();
+    const label = `${actionType} at ${timestamp}`;
+
+    // Save to history, skipping duplicates
+    saveToHistory('converter', label, {
+      jsonString: jsonString.value,
+      jsObject: jsObject.value,
+      operation: actionType
+    }, true); // true = skip duplicates
+  }
+}
+
+// Load history item
+function loadHistoryItem(item: HistoryItem) {
+  const data = item.data;
+  jsonString.value = data.jsonString || '';
+  jsObject.value = data.jsObject || '';
+
+  // Hide history panel after loading
+  showHistory.value = false;
+
+  successMessage.value = 'History item loaded!';
+  setTimeout(() => {
+    successMessage.value = '';
+  }, 2000);
+}
+
+// Save current state to localStorage when component unmounts
+function saveState() {
+  saveToolState('converter', {
+    jsonString: jsonString.value,
+    jsObject: jsObject.value
+  });
+}
+
+// Load previous state if available
+function loadPreviousState() {
+  const state = getToolState('converter');
+  if (state) {
+    jsonString.value = state.jsonString || '';
+    jsObject.value = state.jsObject || '';
+  }
+}
+
+// Register and unregister lifecycle hooks
+onMounted(() => {
+  loadPreviousState();
+});
+
+onUnmounted(() => {
+  saveState();
+});
 </script>

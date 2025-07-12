@@ -2,6 +2,14 @@
   <div class="container">
     <p class="tool-description">Explore and extract data from complex JSON structures using JSONPath expressions</p>
 
+    <div class="options-bar">
+      <button @click="showHistory = !showHistory" class="btn btn-sm" :class="{ 'btn-primary': showHistory }">
+        <span class="icon">⏱</span> History
+      </button>
+    </div>
+
+    <HistoryPanel v-if="showHistory" toolName="path" @select="loadHistoryItem" />
+
     <div class="json-path-container">
       <div class="json-input-section">
         <h3>JSON Input</h3>
@@ -108,12 +116,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import HistoryPanel from '../components/HistoryPanel.vue'
+import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
 const jsonInput = ref('')
 const jsonPath = ref('')
 const pathResult = ref<any>(null)
 const errorMessage = ref('')
+const showHistory = ref(false)
 
 // Use a simple JSONPath implementation with basic support for common operations
 function evaluatePath() {
@@ -134,6 +145,11 @@ function evaluatePath() {
     const jsonData = JSON.parse(jsonInput.value)
     const result = jsonPathQuery(jsonData, jsonPath.value)
     pathResult.value = result
+
+    // Save to history when we have results
+    if (pathResult.value) {
+      saveCurrentToHistory('Query');
+    }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Error evaluating JSONPath'
   }
@@ -321,6 +337,63 @@ function loadSampleData() {
     }
   }, null, 2)
 }
+
+// Save to history when a successful path query is made
+function saveCurrentToHistory(actionType: string) {
+  if (jsonInput.value && jsonPath.value && pathResult.value) {
+    const timestamp = new Date().toLocaleTimeString();
+    const label = `${actionType} at ${timestamp}`;
+
+    // Save to history, skipping duplicates
+    saveToHistory('path', label, {
+      jsonInput: jsonInput.value,
+      jsonPath: jsonPath.value,
+      pathResult: pathResult.value
+    }, true); // true = skip duplicates
+  }
+}
+
+// Load history item
+function loadHistoryItem(item: HistoryItem) {
+  const data = item.data;
+  jsonInput.value = data.jsonInput;
+  jsonPath.value = data.jsonPath;
+  pathResult.value = data.pathResult;
+
+  // Hide history panel after loading
+  showHistory.value = false;
+}
+
+// Save current state to localStorage when component unmounts
+function saveState() {
+  saveToolState('path', {
+    jsonInput: jsonInput.value,
+    jsonPath: jsonPath.value
+  });
+}
+
+// Load previous state if available
+function loadPreviousState() {
+  const state = getToolState('path');
+  if (state) {
+    jsonInput.value = state.jsonInput || '';
+    jsonPath.value = state.jsonPath || '';
+
+    // Re-evaluate the path if both input and path exist
+    if (jsonInput.value && jsonPath.value) {
+      evaluatePath();
+    }
+  }
+}
+
+// Register and unregister lifecycle hooks
+onMounted(() => {
+  loadPreviousState();
+});
+
+onUnmounted(() => {
+  saveState();
+});
 </script>
 
 <style scoped>
