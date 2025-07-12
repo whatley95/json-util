@@ -17,6 +17,13 @@
           <option value="compact">Compact</option>
         </select>
       </div>
+      <div class="auto-compare-toggle" title="When enabled, comparison updates as you type">
+        <label for="auto-compare">Auto Compare:</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="auto-compare" v-model="autoCompareEnabled">
+          <span class="toggle-slider"></span>
+        </div>
+      </div>
     </div>
 
     <div class="grid grid-2">
@@ -42,13 +49,14 @@
     </div>
 
     <div class="action-buttons">
-      <button @click="compareJson" class="btn btn-lg">
-        <span class="icon">🔍</span> Compare JSON
+      <button @click="compareJson" class="btn btn-lg" :class="{ 'btn-secondary': autoCompareEnabled }"
+        title="Compare JSON (Ctrl+Enter)">
+        <span class="icon">🔍</span> {{ autoCompareEnabled ? 'Refresh Diff' : 'Compare JSON' }}
       </button>
-      <button @click="clearAll" class="btn btn-secondary">
+      <button @click="clearAll" class="btn btn-secondary" title="Clear All (Ctrl+Shift+C)">
         <span class="icon">⌫</span> Clear All
       </button>
-      <button @click="swapJsons" class="btn btn-sm">
+      <button @click="swapJsons" class="btn btn-sm" title="Swap original and modified JSON">
         <span class="icon">↔️</span> Swap
       </button>
     </div>
@@ -65,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 import * as Diff2Html from 'diff2html'
 import 'diff2html/bundles/css/diff2html.min.css'
 
@@ -76,6 +84,8 @@ const errorMessage = ref('')
 const diffContainer = ref(null)
 const viewMode = ref('side-by-side')
 const outputFormat = ref('formatted')
+const autoCompareEnabled = ref(true) // Enable auto-compare by default
+const debounceTimer = ref(null as number | null)
 
 // Watch for changes in view mode to rerender diff if needed
 watch([viewMode, outputFormat], () => {
@@ -84,14 +94,54 @@ watch([viewMode, outputFormat], () => {
   }
 })
 
+// Helper function to debounce the comparison
+const debouncedCompare = () => {
+  // Clear any existing timer
+  if (debounceTimer.value !== null) {
+    clearTimeout(debounceTimer.value)
+  }
+
+  // Set a new timer
+  debounceTimer.value = window.setTimeout(() => {
+    if (autoCompareEnabled.value) {
+      compareJson()
+    }
+  }, 800) // Wait 800ms after user stops typing
+}
+
+// Watch for changes in the JSON inputs
+watch([originalJson, modifiedJson], () => {
+  if (originalJson.value && modifiedJson.value) {
+    debouncedCompare()
+  }
+})
+
 const compareJson = () => {
   errorMessage.value = ''
   diffResult.value = ''
 
+  // Skip comparison if either input is empty
+  if (!originalJson.value.trim() || !modifiedJson.value.trim()) {
+    return
+  }
+
   try {
-    // Parse and format both JSONs
-    const original = originalJson.value ? JSON.parse(originalJson.value) : {}
-    const modified = modifiedJson.value ? JSON.parse(modifiedJson.value) : {}
+    // Parse both JSONs with error handling for each
+    let original, modified;
+
+    try {
+      original = JSON.parse(originalJson.value)
+    } catch (err) {
+      errorMessage.value = 'Error in Original JSON: ' + (err instanceof Error ? err.message : 'Invalid format')
+      return
+    }
+
+    try {
+      modified = JSON.parse(modifiedJson.value)
+    } catch (err) {
+      errorMessage.value = 'Error in Modified JSON: ' + (err instanceof Error ? err.message : 'Invalid format')
+      return
+    }
 
     // Generate a unified diff
     const originalStr = outputFormat.value === 'formatted'
@@ -208,6 +258,30 @@ const clearAll = () => {
     diffContainer.value.innerHTML = ''
   }
 }
+
+// Keyboard shortcuts
+const handleKeyboardShortcut = (event: KeyboardEvent) => {
+  // Ctrl+Enter or Cmd+Enter to compare
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    compareJson()
+    event.preventDefault()
+  }
+
+  // Ctrl+Shift+C or Cmd+Shift+C to clear all
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'C') {
+    clearAll()
+    event.preventDefault()
+  }
+}
+
+// Register and unregister keyboard shortcuts
+onMounted(() => {
+  document.addEventListener('keydown', handleKeyboardShortcut)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyboardShortcut)
+})
 </script>
 
 <style scoped>
@@ -217,6 +291,10 @@ const clearAll = () => {
   margin-bottom: 1.5rem;
   justify-content: center;
   flex-wrap: wrap;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }
 
 .select-input {
@@ -228,6 +306,66 @@ const clearAll = () => {
   margin-left: 0.5rem;
 }
 
+.auto-compare-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.auto-compare-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  margin-left: 0.5rem;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.15);
+  transition: .4s;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked+.toggle-slider {
+  background-color: var(--primary);
+}
+
+input:checked+.toggle-slider:before {
+  transform: translateX(22px);
+}
+
 .json-input-container {
   display: flex;
   flex-direction: column;
@@ -235,7 +373,22 @@ const clearAll = () => {
 
 .json-input {
   flex: 1;
-  min-height: 300px;
+  min-height: 350px;
+  resize: vertical;
+  font-family: monospace;
+  line-height: 1.4;
+}
+
+@media (max-height: 800px) {
+  .json-input {
+    min-height: 250px;
+  }
+}
+
+@media (min-height: 1000px) {
+  .json-input {
+    min-height: 450px;
+  }
 }
 
 .sample-buttons {
