@@ -51,13 +51,13 @@
     <div class="action-buttons">
       <button @click="compareJson" class="btn btn-lg" :class="{ 'btn-secondary': autoCompareEnabled }"
         title="Compare JSON (Ctrl+Enter)">
-        <span class="icon">🔍</span> {{ autoCompareEnabled ? 'Refresh Diff' : 'Compare JSON' }}
+        <span class="icon">⟐</span> {{ autoCompareEnabled ? 'Refresh Diff' : 'Compare JSON' }}
       </button>
       <button @click="clearAll" class="btn btn-secondary" title="Clear All (Ctrl+Shift+C)">
-        <span class="icon">⌫</span> Clear All
+        <span class="icon">✕</span> Clear All
       </button>
-      <button @click="swapJsons" class="btn btn-sm" title="Swap original and modified JSON">
-        <span class="icon">↔️</span> Swap
+      <button @click="swapJsons" class="btn btn-sm" title="Swap original and modified JSON (Ctrl+Shift+S)">
+        <span class="icon">⇄</span> Swap
       </button>
     </div>
 
@@ -272,6 +272,12 @@ const handleKeyboardShortcut = (event: KeyboardEvent) => {
     clearAll()
     event.preventDefault()
   }
+
+  // Ctrl+Shift+S or Cmd+Shift+S to swap JSONs
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'S') {
+    swapJsons()
+    event.preventDefault()
+  }
 }
 
 // Register and unregister keyboard shortcuts
@@ -287,23 +293,31 @@ onUnmounted(() => {
 <style scoped>
 .diff-options {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  /* Increased from 1rem */
+  margin-bottom: 2rem;
+  /* Increased from 1.5rem */
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
-  padding: 0.75rem;
+  padding: 1rem 1.25rem;
+  /* Increased from 0.75rem */
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
 }
 
 .select-input {
-  padding: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  /* Increased padding for larger height */
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--surface);
   color: var(--text);
   margin-left: 0.5rem;
+  height: 40px;
+  /* Set specific height for consistency */
+  min-width: 140px;
+  /* Ensure dropdowns have enough width */
 }
 
 .auto-compare-toggle {
@@ -322,8 +336,10 @@ onUnmounted(() => {
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 46px;
-  height: 24px;
+  width: 56px;
+  /* Increased from 46px */
+  height: 30px;
+  /* Increased from 24px */
   margin-left: 0.5rem;
 }
 
@@ -344,18 +360,48 @@ onUnmounted(() => {
   transition: .4s;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.toggle-slider::after {
+  content: "Off";
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  /* Slightly increased font size */
+  margin-left: 24px;
+  /* Adjusted for new size */
+  margin-top: 2px;
+}
+
+input:checked+.toggle-slider::after {
+  content: "On";
+  color: rgba(255, 255, 255, 0.8);
+  margin-right: 24px;
+  /* Adjusted for new size */
 }
 
 .toggle-slider:before {
   position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 2px;
+  content: "●";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 18px;
+  /* Increased from 16px */
+  height: 24px;
+  /* Increased from 18px */
+  width: 24px;
+  /* Increased from 18px */
+  left: 4px;
+  bottom: 3px;
   background-color: white;
   transition: .4s;
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 input:checked+.toggle-slider {
@@ -363,7 +409,10 @@ input:checked+.toggle-slider {
 }
 
 input:checked+.toggle-slider:before {
-  transform: translateX(22px);
+  transform: translateX(26px);
+  /* Increased from 22px to match new toggle size */
+  color: var(--primary);
+  background-color: white;
 }
 
 .json-input-container {
@@ -373,21 +422,26 @@ input:checked+.toggle-slider:before {
 
 .json-input {
   flex: 1;
-  min-height: 350px;
+  min-height: 450px;
+  /* Increased from 350px */
   resize: vertical;
   font-family: monospace;
   line-height: 1.4;
+  padding: 12px;
+  /* Added more padding for better readability */
 }
 
 @media (max-height: 800px) {
   .json-input {
-    min-height: 250px;
+    min-height: 350px;
+    /* Increased from 250px */
   }
 }
 
 @media (min-height: 1000px) {
   .json-input {
-    min-height: 450px;
+    min-height: 550px;
+    /* Increased from 450px */
   }
 }
 
@@ -399,16 +453,55 @@ input:checked+.toggle-slider:before {
 }
 
 .action-buttons {
-  margin: 1.5rem 0;
+  margin: 2rem 0;
+  /* Increased from 1.5rem */
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
+  /* Increased from 1rem */
   justify-content: center;
   flex-wrap: wrap;
 }
 
+/* Make buttons slightly larger */
+.action-buttons .btn {
+  padding: 0.6rem 1.2rem;
+  /* More generous padding */
+  font-size: 1.05rem;
+  /* Slightly larger font */
+}
+
+.action-buttons .btn-lg {
+  padding: 0.8rem 1.5rem;
+  /* Larger padding for the main button */
+}
+
+.icon {
+  display: inline-block;
+  margin-right: 0.4rem;
+  font-weight: bold;
+  font-size: 1.1em;
+  vertical-align: middle;
+  position: relative;
+  top: -0.05em;
+  transition: transform 0.2s ease;
+}
+
+button:active .icon {
+  transform: scale(0.9);
+}
+
+button:hover .icon {
+  transform: scale(1.1);
+}
+
 .diff-result-container {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
+  /* Increased from 1.5rem */
   text-align: left;
+  min-height: 300px;
+  /* Added min-height */
+  padding: 1.25rem;
+  /* Added padding */
 }
 
 :deep(.d2h-file-header) {
