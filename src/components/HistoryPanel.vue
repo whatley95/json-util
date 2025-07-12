@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { HistoryItem, getHistory, clearHistory, deleteHistoryItem } from '../utils/localStorage';
 
 const props = defineProps<{
@@ -38,10 +38,24 @@ const emit = defineEmits<{
 }>();
 
 const history = ref<HistoryItem[]>([]);
+const autoRefreshInterval = 3000; // Refresh every 3 seconds
+let refreshTimer: number | null = null;
 
-// Load history on mount
+// Load history on mount and set up auto-refresh
 onMounted(() => {
     loadHistory();
+
+    // Set up periodic refresh to catch changes from other components
+    refreshTimer = window.setInterval(() => {
+        loadHistory();
+    }, autoRefreshInterval);
+});
+
+// Clean up timer on unmount
+onUnmounted(() => {
+    if (refreshTimer !== null) {
+        window.clearInterval(refreshTimer);
+    }
 });
 
 // Reload history when tool name changes

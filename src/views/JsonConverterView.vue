@@ -262,6 +262,12 @@ const copyJsonString = async () => {
   try {
     await navigator.clipboard.writeText(jsonString.value)
     successMessage.value = 'JSON copied to clipboard!'
+
+    // Save to history when copying, if we have valid data
+    if (jsonString.value && !errorMessage.value) {
+      saveCurrentToHistory('Copy JSON')
+    }
+
     setTimeout(() => {
       successMessage.value = ''
     }, 2000)
@@ -274,6 +280,12 @@ const copyJsObject = async () => {
   try {
     await navigator.clipboard.writeText(jsObject.value)
     successMessage.value = 'Object copied to clipboard!'
+
+    // Save to history when copying, if we have valid data
+    if (jsObject.value && !errorMessage.value) {
+      saveCurrentToHistory('Copy Object')
+    }
+
     setTimeout(() => {
       successMessage.value = ''
     }, 2000)

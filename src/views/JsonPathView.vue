@@ -340,9 +340,9 @@ function loadSampleData() {
 
 // Save to history when a successful path query is made
 function saveCurrentToHistory(actionType: string) {
-  if (jsonInput.value && jsonPath.value && pathResult.value) {
+  if (jsonInput.value && jsonPath.value && pathResult.value && !errorMessage.value) {
     const timestamp = new Date().toLocaleTimeString();
-    const label = `${actionType} at ${timestamp}`;
+    const label = `${actionType}: ${jsonPath.value.substring(0, 20)}${jsonPath.value.length > 20 ? '...' : ''}`;
 
     // Save to history, skipping duplicates
     saveToHistory('path', label, {

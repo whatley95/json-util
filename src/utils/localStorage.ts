@@ -75,9 +75,24 @@ export function saveToHistory(toolName: string, label: string, data: any, skipDu
 
     // Save back to localStorage
     try {
+        // Try to save but handle quota exceeded errors
         localStorage.setItem(key, JSON.stringify(history));
     } catch (error) {
         console.error('Failed to save history to localStorage:', error);
+
+        // If we hit storage limits, try removing older items
+        if (error instanceof DOMException && (error.name === 'QuotaExceededError' ||
+            error.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
+
+            // Keep only half of the items and try again
+            const reducedHistory = history.slice(0, Math.max(5, Math.floor(history.length / 2)));
+
+            try {
+                localStorage.setItem(key, JSON.stringify(reducedHistory));
+            } catch (innerError) {
+                console.error('Failed to save reduced history:', innerError);
+            }
+        }
     }
 
     return newItem;

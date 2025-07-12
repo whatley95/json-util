@@ -206,13 +206,19 @@ function saveCurrentToHistory(actionType: string) {
 // Load history item
 function loadHistoryItem(item: HistoryItem) {
   const data = item.data;
-  inputJson.value = data.inputJson;
-  outputJson.value = data.outputJson;
-  indentSize.value = data.indentSize;
-  jsonStats.value = data.stats;
+  inputJson.value = data.inputJson || '';
+  outputJson.value = data.outputJson || '';
+  indentSize.value = data.indentSize || '2';
+  jsonStats.value = data.stats || null;
 
   // Hide history panel after loading
   showHistory.value = false;
+
+  // Show success message
+  successMessage.value = 'History item loaded!';
+  setTimeout(() => {
+    successMessage.value = '';
+  }, 2000);
 }
 
 // Save current state to localStorage when component unmounts

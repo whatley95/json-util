@@ -45,6 +45,14 @@
         </div>
       </div>
     </div>
+
+    <div v-if="errorMessage" class="error">
+      {{ errorMessage }}
+    </div>
+
+    <div v-if="successMessage" class="success">
+      {{ successMessage }}
+    </div>
   </div>
 </template>
 
@@ -58,6 +66,8 @@ const jsonInput = ref('')
 const validationResult = ref('')
 const isValid = ref(false)
 const showHistory = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
 const stats = ref({
   objects: 0,
   arrays: 0,
@@ -93,9 +103,19 @@ const validateJson = () => {
 
     // Save to history
     saveCurrentToHistory('Validate')
+
+    // Show success message
+    successMessage.value = 'JSON validated successfully!';
+    setTimeout(() => {
+      successMessage.value = '';
+    }, 2000);
   } catch (error) {
     isValid.value = false
     validationResult.value = error instanceof Error ? error.message : 'Invalid JSON'
+    errorMessage.value = 'Validation failed';
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 2000);
   }
 }
 
