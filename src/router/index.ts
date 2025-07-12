@@ -8,9 +8,12 @@ import JsonConverterView from '../views/JsonConverterView.vue'
 import JsonValidateView from '../views/JsonValidateView.vue'
 import JsonPathView from '../views/JsonPathView.vue'
 
+// Determine base URL based on environment
+const base = import.meta.env.BASE_URL || '/'
+
 const router = createRouter({
   // Use the correct base URL matching Vite's configuration
-  history: createWebHistory('/json-util/'),
+  history: createWebHistory(base),
   routes: [
     {
       path: '/',

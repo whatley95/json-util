@@ -1,0 +1,16 @@
+[site]
+bucket = "./dist"
+
+[build]
+command = "npm run build"
+publish = "dist"
+
+[build.environment]
+NODE_VERSION = "18"
+
+[env.production]
+name = "production"
+route = "*"
+
+[env.development]
+name = "development"

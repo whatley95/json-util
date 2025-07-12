@@ -11,6 +11,7 @@
     "start": "node start.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "npm run build && gh-pages -d dist",
+    "deploy:cf": "set CF_PAGES=1 && npm run build",
     "lint": "eslint --ext .js,.vue,.ts src/",
     "format": "prettier --write \"src/**/*.{js,vue,ts}\""
   },

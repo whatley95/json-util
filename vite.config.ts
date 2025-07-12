@@ -8,8 +8,8 @@ export default defineConfig({
   server: {
     port: 3000
   },
-  // Base path for GitHub Pages deployment
-  base: '/json-util/',
+  // Base path for deployment
+  base: process.env.CF_PAGES ? '/' : '/json-util/',
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
