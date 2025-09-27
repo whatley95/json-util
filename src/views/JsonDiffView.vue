@@ -76,11 +76,16 @@
       <h3>Differences</h3>
       <div class="diff-view" ref="diffContainer"></div>
     </div>
+    <div v-else-if="noDiffFound" class="card diff-result-container no-diff-message">
+      <h3>No Differences Found</h3>
+      <p>The JSON objects are equivalent (ignoring key order).</p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { createTwoFilesPatch } from 'diff'
 import * as Diff2Html from 'diff2html'
 import 'diff2html/bundles/css/diff2html.min.css'
 import HistoryPanel from '../components/HistoryPanel.vue'
@@ -96,11 +101,19 @@ const outputFormat = ref('formatted')
 const autoCompareEnabled = ref(true) // Enable auto-compare by default
 const debounceTimer = ref(null as number | null)
 const showHistory = ref(false) // Toggle history panel visibility
+const noDiffFound = ref(false)
 
-// Watch for changes in view mode to rerender diff if needed
-watch([viewMode, outputFormat], () => {
+// Rerender diff when view mode changes
+watch(viewMode, () => {
   if (diffResult.value) {
     renderDiff()
+  }
+})
+
+// Recalculate diff when output format changes
+watch(outputFormat, () => {
+  if (originalJson.value && modifiedJson.value) {
+    compareJson()
   }
 })
 
@@ -126,9 +139,27 @@ watch([originalJson, modifiedJson], () => {
   }
 })
 
+const normalizeJson = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(item => normalizeJson(item))
+  }
+
+  if (value !== null && typeof value === 'object') {
+    return Object.keys(value as Record<string, unknown>)
+      .sort()
+      .reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = normalizeJson((value as Record<string, unknown>)[key])
+        return acc
+      }, {})
+  }
+
+  return value
+}
+
 const compareJson = () => {
   errorMessage.value = ''
   diffResult.value = ''
+  noDiffFound.value = false
 
   // Skip comparison if either input is empty
   if (!originalJson.value.trim() || !modifiedJson.value.trim()) {
@@ -137,7 +168,7 @@ const compareJson = () => {
 
   try {
     // Parse both JSONs with error handling for each
-    let original, modified;
+    let original, modified
 
     try {
       original = JSON.parse(originalJson.value)
@@ -153,16 +184,39 @@ const compareJson = () => {
       return
     }
 
-    // Generate a unified diff
-    const originalStr = outputFormat.value === 'formatted'
-      ? JSON.stringify(original, null, 2)
-      : JSON.stringify(original)
-    const modifiedStr = outputFormat.value === 'formatted'
-      ? JSON.stringify(modified, null, 2)
-      : JSON.stringify(modified)
+    // Normalize JSON structures to make comparison order-insensitive
+    const normalizedOriginal = normalizeJson(original)
+    const normalizedModified = normalizeJson(modified)
 
-    // Create a unified diff string
-    const diff = createUnifiedDiff(originalStr, modifiedStr)
+    const canonicalOriginal = JSON.stringify(normalizedOriginal)
+    const canonicalModified = JSON.stringify(normalizedModified)
+
+    if (canonicalOriginal === canonicalModified) {
+      noDiffFound.value = true
+      if (diffContainer.value) {
+        diffContainer.value.innerHTML = ''
+      }
+      // Save to history even when equal to allow recall
+      saveCurrentToHistory()
+      return
+    }
+
+    // Prepare strings for diff output
+    const originalStr = outputFormat.value === 'formatted'
+      ? JSON.stringify(normalizedOriginal, null, 2)
+      : JSON.stringify(normalizedOriginal)
+    const modifiedStr = outputFormat.value === 'formatted'
+      ? JSON.stringify(normalizedModified, null, 2)
+      : JSON.stringify(normalizedModified)
+
+    // Create a proper unified diff using jsdiff
+    const diff = createTwoFilesPatch(
+      'original.json',
+      'modified.json',
+      originalStr + '\n',
+      modifiedStr + '\n'
+    )
+
     diffResult.value = diff
 
     // Render the diff using diff2html
@@ -175,29 +229,15 @@ const compareJson = () => {
   }
 }
 
-const createUnifiedDiff = (originalStr: string, modifiedStr: string): string => {
-  const originalLines = originalStr.split('\n')
-  const modifiedLines = modifiedStr.split('\n')
-
-  let diffStr = '--- a/original.json\n'
-  diffStr += '+++ b/modified.json\n'
-  diffStr += '@@ -1,' + originalLines.length + ' +1,' + modifiedLines.length + ' @@\n'
-
-  // Add all lines from original with - prefix
-  originalLines.forEach(line => {
-    diffStr += '-' + line + '\n'
-  })
-
-  // Add all lines from modified with + prefix
-  modifiedLines.forEach(line => {
-    diffStr += '+' + line + '\n'
-  })
-
-  return diffStr
-}
-
 const renderDiff = () => {
-  if (!diffContainer.value) return
+  if (!diffContainer.value) {
+    return
+  }
+
+  if (!diffResult.value) {
+    diffContainer.value.innerHTML = ''
+    return
+  }
 
   const configuration = {
     drawFileList: false,
@@ -267,6 +307,7 @@ const clearAll = () => {
   modifiedJson.value = ''
   diffResult.value = ''
   errorMessage.value = ''
+  noDiffFound.value = false
   if (diffContainer.value) {
     diffContainer.value.innerHTML = ''
   }
@@ -421,6 +462,17 @@ onUnmounted(() => {
   opacity: 0;
   width: 0;
   height: 0;
+}
+
+.no-diff-message {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1.5rem;
+}
+
+.no-diff-message p {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 
 .toggle-slider {

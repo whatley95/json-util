@@ -34,6 +34,7 @@
   },
   "homepage": "https://whatley95.github.io/json-util/",
   "dependencies": {
+    "diff": "^5.2.0",
     "diff2html": "^3.4.20",
     "jsonlint-mod": "^1.7.6",
     "pinia": "^2.1.7",
