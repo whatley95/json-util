@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { saveToHistory, getHistory, saveToolState, getToolState, clearHistory, type HistoryItem } from '../utils/localStorage'
-import type { BaseToolState, KeyboardShortcut, LoadingState } from '../types'
+import type { BaseToolState, KeyboardShortcut, LoadingState } from '../types/index'
 
 /**
  * Utility function to debounce a function call

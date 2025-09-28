@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { ToastNotification } from '../types'
+import type { ToastNotification, BaseToolState, KeyboardShortcut, LoadingState } from '../types/index'
 
 const toasts = ref<ToastNotification[]>([])
 let toastIdCounter = 0
