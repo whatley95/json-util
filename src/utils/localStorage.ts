@@ -77,6 +77,12 @@ export function saveToHistory(toolName: string, label: string, data: any, skipDu
     try {
         // Try to save but handle quota exceeded errors
         localStorage.setItem(key, JSON.stringify(history));
+
+        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+            window.dispatchEvent(new CustomEvent('json-util:history-updated', {
+                detail: { toolName }
+            }));
+        }
     } catch (error) {
         console.error('Failed to save history to localStorage:', error);
 
@@ -89,6 +95,12 @@ export function saveToHistory(toolName: string, label: string, data: any, skipDu
 
             try {
                 localStorage.setItem(key, JSON.stringify(reducedHistory));
+
+                if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+                    window.dispatchEvent(new CustomEvent('json-util:history-updated', {
+                        detail: { toolName }
+                    }));
+                }
             } catch (innerError) {
                 console.error('Failed to save reduced history:', innerError);
             }

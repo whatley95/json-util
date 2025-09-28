@@ -38,24 +38,34 @@ const emit = defineEmits<{
 }>();
 
 const history = ref<HistoryItem[]>([]);
-const autoRefreshInterval = 3000; // Refresh every 3 seconds
-let refreshTimer: number | null = null;
 
-// Load history on mount and set up auto-refresh
+const historyStorageKey = (tool: string) => `json-util.${tool}.history`;
+
+const handleStorage = (event: StorageEvent) => {
+    if (event.key === historyStorageKey(props.toolName)) {
+        loadHistory();
+    }
+};
+
+const handleHistoryUpdated = (event: Event) => {
+    const detail = (event as CustomEvent).detail;
+    if (!detail || typeof detail !== 'object') return;
+    if (detail.toolName === props.toolName) {
+        loadHistory();
+    }
+};
+
+// Load history on mount and register listeners
 onMounted(() => {
     loadHistory();
-
-    // Set up periodic refresh to catch changes from other components
-    refreshTimer = window.setInterval(() => {
-        loadHistory();
-    }, autoRefreshInterval);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('json-util:history-updated', handleHistoryUpdated as EventListener);
 });
 
-// Clean up timer on unmount
+// Clean up listeners on unmount
 onUnmounted(() => {
-    if (refreshTimer !== null) {
-        window.clearInterval(refreshTimer);
-    }
+    window.removeEventListener('storage', handleStorage);
+    window.removeEventListener('json-util:history-updated', handleHistoryUpdated as EventListener);
 });
 
 // Reload history when tool name changes

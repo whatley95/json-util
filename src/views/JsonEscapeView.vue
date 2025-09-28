@@ -131,9 +131,9 @@ function saveCurrentToHistory(actionType: string) {
 
 // Load history item
 function loadHistoryItem(item: HistoryItem) {
-  const data = item.data;
-  inputText.value = data.inputText;
-  outputText.value = data.outputText;
+  const data = item.data || {};
+  inputText.value = data.inputText || '';
+  outputText.value = data.outputText || '';
 
   // Hide history panel after loading
   showHistory.value = false;

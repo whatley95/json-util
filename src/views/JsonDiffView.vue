@@ -340,12 +340,28 @@ function saveCurrentToHistory() {
     const timestamp = new Date().toLocaleTimeString();
     const label = `Comparison at ${timestamp}`;
 
+    let canonicalOriginal: string | undefined;
+    let canonicalModified: string | undefined;
+
+    try {
+      const parsedOriginal = JSON.parse(originalJson.value);
+      const parsedModified = JSON.parse(modifiedJson.value);
+      canonicalOriginal = JSON.stringify(normalizeJson(parsedOriginal));
+      canonicalModified = JSON.stringify(normalizeJson(parsedModified));
+    } catch (error) {
+      // If parsing fails, fall back to raw strings
+      canonicalOriginal = originalJson.value;
+      canonicalModified = modifiedJson.value;
+    }
+
     // Save to history, skipping duplicates
     saveToHistory('diff', label, {
       originalJson: originalJson.value,
       modifiedJson: modifiedJson.value,
       viewMode: viewMode.value,
-      outputFormat: outputFormat.value
+      outputFormat: outputFormat.value,
+      canonicalOriginal,
+      canonicalModified
     }, true); // true = skip duplicates
   }
 }

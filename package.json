@@ -36,6 +36,8 @@
   "dependencies": {
     "diff": "^5.2.0",
     "diff2html": "^3.4.20",
+    "json5": "^2.2.3",
+    "jsonpath-plus": "^7.2.0",
     "jsonlint-mod": "^1.7.6",
     "pinia": "^2.1.7",
     "vue": "^3.3.4",

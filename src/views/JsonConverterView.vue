@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import JSON5 from 'json5'
 import HistoryPanel from '../components/HistoryPanel.vue'
 import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
@@ -142,6 +143,7 @@ const sampleData = {
 const jsonToObject = () => {
   errorMessage.value = ''
   successMessage.value = ''
+  validationResult.value = null
 
   try {
     const parsed = JSON.parse(jsonString.value)
@@ -158,27 +160,17 @@ const jsonToObject = () => {
 const objectToJson = () => {
   errorMessage.value = ''
   successMessage.value = ''
+  validationResult.value = null
 
   try {
-    // Try to evaluate as JavaScript object literal
-    const obj = eval(`(${jsObject.value})`)
-    jsonString.value = JSON.stringify(obj)
+    const parsed = JSON5.parse(jsObject.value)
+    jsonString.value = JSON.stringify(parsed)
     successMessage.value = 'Object converted to JSON successfully!'
 
     // Save to history
     saveCurrentToHistory('Object to JSON')
   } catch (error) {
-    try {
-      // Try to parse as JSON
-      const parsed = JSON.parse(jsObject.value)
-      jsonString.value = JSON.stringify(parsed)
-      successMessage.value = 'Object converted to JSON successfully!'
-
-      // Save to history
-      saveCurrentToHistory('Object to JSON')
-    } catch (e) {
-      errorMessage.value = 'Invalid object format. Cannot convert to JSON.'
-    }
+    errorMessage.value = 'Invalid object format. Cannot convert to JSON.'
   }
 }
 
@@ -305,6 +297,7 @@ const clearObject = () => {
   jsObject.value = ''
   errorMessage.value = ''
   successMessage.value = ''
+  validationResult.value = null
 }
 
 const clearAll = () => {
@@ -335,6 +328,7 @@ function loadHistoryItem(item: HistoryItem) {
   const data = item.data;
   jsonString.value = data.jsonString || '';
   jsObject.value = data.jsObject || '';
+  validationResult.value = null;
 
   // Hide history panel after loading
   showHistory.value = false;

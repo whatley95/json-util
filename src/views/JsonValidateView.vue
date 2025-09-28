@@ -190,12 +190,25 @@ function saveCurrentToHistory(actionType: string) {
 
 // Load history item
 function loadHistoryItem(item: HistoryItem) {
-  const data = item.data;
-  jsonInput.value = data.jsonInput;
+  const data = item.data || {};
+  jsonInput.value = data.jsonInput || '';
+
   if (data.isValid) {
     isValid.value = true;
     validationResult.value = 'JSON is valid';
-    stats.value = data.stats;
+    stats.value = data.stats ?? {
+      objects: 0,
+      arrays: 0,
+      values: 0
+    };
+  } else {
+    isValid.value = false;
+    validationResult.value = '';
+    stats.value = {
+      objects: 0,
+      arrays: 0,
+      values: 0
+    };
   }
 
   // Hide history panel after loading

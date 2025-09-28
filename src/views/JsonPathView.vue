@@ -117,6 +117,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { JSONPath } from 'jsonpath-plus'
 import HistoryPanel from '../components/HistoryPanel.vue'
 import { saveToHistory, saveToolState, getToolState, HistoryItem } from '../utils/localStorage'
 
@@ -126,7 +127,6 @@ const pathResult = ref<any>(null)
 const errorMessage = ref('')
 const showHistory = ref(false)
 
-// Use a simple JSONPath implementation with basic support for common operations
 function evaluatePath() {
   errorMessage.value = ''
   pathResult.value = null
@@ -143,125 +143,27 @@ function evaluatePath() {
 
   try {
     const jsonData = JSON.parse(jsonInput.value)
-    const result = jsonPathQuery(jsonData, jsonPath.value)
+    const expression = jsonPath.value.trim()
+    jsonPath.value = expression
+    const result = JSONPath({
+      path: expression,
+      json: jsonData,
+      wrap: true,
+      resultType: 'value'
+    })
+
+    if (Array.isArray(result) && result.length === 0) {
+      errorMessage.value = 'No results found for the provided JSONPath expression'
+      return
+    }
+
     pathResult.value = result
 
-    // Save to history when we have results
     if (pathResult.value) {
-      saveCurrentToHistory('Query');
+      saveCurrentToHistory('Query')
     }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Error evaluating JSONPath'
-  }
-}
-
-// Very simplified JSONPath implementation for common cases
-function jsonPathQuery(obj: any, path: string): any[] {
-  try {
-    // Implementation of a simple JSONPath query function
-    // This is a simplified version that works for basic paths
-
-    // Handle the root element
-    if (path === '$') {
-      return [obj]
-    }
-
-    // Handle basic property access ($.property)
-    if (path.startsWith('$.') && !path.includes('[') && !path.includes('..')) {
-      const props = path.substring(2).split('.')
-      let current = obj
-
-      for (const prop of props) {
-        if (current === undefined || current === null) {
-          return []
-        }
-        current = current[prop]
-      }
-
-      return current === undefined ? [] : [current]
-    }
-
-    // Handle array index access ($.array[0])
-    if (path.includes('[') && path.includes(']')) {
-      const pathParts = path.substring(2).split('[')
-      let current = obj
-
-      // Get to the array
-      if (pathParts[0]) {
-        const props = pathParts[0].split('.')
-        for (const prop of props) {
-          if (prop === '') continue
-          if (current === undefined || current === null) {
-            return []
-          }
-          current = current[prop]
-        }
-      }
-
-      // Extract the index from "[index]"
-      const indexStr = pathParts[1].substring(0, pathParts[1].length - 1)
-      const index = parseInt(indexStr)
-
-      if (Array.isArray(current) && !isNaN(index)) {
-        return current[index] === undefined ? [] : [current[index]]
-      }
-
-      return []
-    }
-
-    // Handle wildcard for array elements ($.array[*].property)
-    if (path.includes('[*]')) {
-      const parts = path.split('[*]')
-      const beforeWildcard = parts[0].substring(2)
-      const afterWildcard = parts[1] ? parts[1].substring(1) : ''
-
-      let current = obj
-      if (beforeWildcard) {
-        const props = beforeWildcard.split('.')
-        for (const prop of props) {
-          if (prop === '') continue
-          if (current === undefined || current === null) {
-            return []
-          }
-          current = current[prop]
-        }
-      }
-
-      if (!Array.isArray(current)) {
-        return []
-      }
-
-      if (!afterWildcard) {
-        return current
-      }
-
-      // Process each item in the array with the remaining path
-      const results: any[] = []
-      for (const item of current) {
-        let value = item
-        const props = afterWildcard.split('.')
-        for (const prop of props) {
-          if (prop === '') continue
-          if (value === undefined || value === null) {
-            break
-          }
-          value = value[prop]
-        }
-        if (value !== undefined) {
-          results.push(value)
-        }
-      }
-
-      return results
-    }
-
-    // For more complex paths, show error - we'd need a full JSONPath library
-    // for proper implementation of recursive descent, filters, etc.
-    throw new Error('Complex JSONPath expressions require a full JSONPath library. Try simpler paths or check the examples.')
-
-  } catch (error) {
-    console.error('JSONPath evaluation error', error)
-    throw new Error('Error evaluating JSONPath: ' + (error instanceof Error ? error.message : String(error)))
   }
 }
 
@@ -336,32 +238,35 @@ function loadSampleData() {
       }
     }
   }, null, 2)
+  errorMessage.value = ''
+  pathResult.value = null
 }
 
 // Save to history when a successful path query is made
 function saveCurrentToHistory(actionType: string) {
   if (jsonInput.value && jsonPath.value && pathResult.value && !errorMessage.value) {
-    const timestamp = new Date().toLocaleTimeString();
-    const label = `${actionType}: ${jsonPath.value.substring(0, 20)}${jsonPath.value.length > 20 ? '...' : ''}`;
+    const expression = jsonPath.value.trim()
+    const label = `${actionType}: ${expression.substring(0, 20)}${expression.length > 20 ? '...' : ''}`
 
     // Save to history, skipping duplicates
     saveToHistory('path', label, {
       jsonInput: jsonInput.value,
-      jsonPath: jsonPath.value,
+      jsonPath: expression,
       pathResult: pathResult.value
-    }, true); // true = skip duplicates
+    }, true) // true = skip duplicates
   }
 }
 
 // Load history item
 function loadHistoryItem(item: HistoryItem) {
-  const data = item.data;
-  jsonInput.value = data.jsonInput;
-  jsonPath.value = data.jsonPath;
-  pathResult.value = data.pathResult;
+  const data = item.data || {}
+  jsonInput.value = data.jsonInput || ''
+  jsonPath.value = data.jsonPath || ''
+  pathResult.value = data.pathResult ?? null
+  errorMessage.value = ''
 
   // Hide history panel after loading
-  showHistory.value = false;
+  showHistory.value = false
 }
 
 // Save current state to localStorage when component unmounts
