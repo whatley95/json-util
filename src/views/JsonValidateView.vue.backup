@@ -1,0 +1,355 @@
+<template>
+  <BaseToolLayout
+    tool-name="validate"
+    description="Validate JSON structure and format with detailed feedback"
+    :primary-action="primaryAction"
+    :is-processing="isProcessing"
+    :loading-message="loadingMessage"
+    :error-message="errorMessage"
+    :success-message="successMessage"
+    @history-select="handleHistorySelect"
+    @clear-all="handleClearAll"
+  >
+    <template #inputs>
+      <BaseJsonInput
+        v-model="jsonInput"
+        title="JSON Input"
+        placeholder="Enter your JSON here..."
+        :has-error="!!errorMessage"
+        :error-message="inputErrorMessage"
+        :show-stats="true"
+        @format="handleFormat"
+        @clear="handleClear"
+      />
+    </template>
+
+    <template #output>
+      <div v-if="validationResult" class="validation-results">
+        <div v-if="isValid" class="validation-success card">
+          <h3>✅ Valid JSON</h3>
+          <p>Your JSON is syntactically valid and well-formed.</p>
+          
+          <div class="json-stats">
+            <div class="stat-item">
+              <span class="stat-label">Size:</span>
+              <span class="stat-value">{{ formatBytes(stats.size) }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Objects:</span>
+              <span class="stat-value">{{ stats.objects }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Arrays:</span>
+              <span class="stat-value">{{ stats.arrays }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Values:</span>
+              <span class="stat-value">{{ stats.values }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Depth:</span>
+              <span class="stat-value">{{ stats.depth }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else class="validation-error card">
+          <h3>❌ Invalid JSON</h3>
+          <div class="error-details">
+            <pre class="error-message">{{ validationResult }}</pre>
+          </div>
+        </div>
+      </div>
+    </template>
+  </BaseToolLayout>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import jsonlint from 'jsonlint-mod'
+import BaseToolLayout from '../components/base/BaseToolLayout.vue'
+import BaseJsonInput from '../components/base/BaseJsonInput.vue'
+import { useJsonTool } from '../composables/useJsonTool'
+import { globalToast } from '../composables/useToast'
+import type { HistoryItem, JsonStatistics } from '../types'
+
+const {
+  state,
+  loadingState,
+  history,
+  saveToHistoryList,
+  setLoading,
+  setError,
+  clearAll: clearToolState,
+  processJson,
+  validateJson: validateJsonString,
+  formatJson: formatJsonString,
+  registerShortcut,
+  createDebouncedFunction
+} = useJsonTool('validate')
+
+// Component state
+const jsonInput = ref('')
+const validationResult = ref('')
+const isValid = ref(false)
+const stats = ref<JsonStatistics>({
+  objects: 0,
+  arrays: 0,
+  values: 0,
+  depth: 0,
+  size: 0
+})
+
+// Computed properties
+const isProcessing = computed(() => state.value.isProcessing)
+const loadingMessage = computed(() => loadingState.value.message || 'Validating JSON...')
+const errorMessage = computed(() => state.value.error)
+const successMessage = computed(() => isValid.value ? 'JSON is valid!' : '')
+const inputErrorMessage = computed(() => !isValid.value && validationResult.value ? 'Invalid JSON syntax' : '')
+
+const primaryAction = computed(() => ({
+  label: 'Validate JSON',
+  handler: handleValidate,
+  icon: '✓',
+  class: 'btn-success'
+}))
+
+// Setup keyboard shortcuts
+onMounted(() => {
+  registerShortcut({
+    key: 'Enter',
+    ctrlKey: true,
+    action: handleValidate,
+    description: 'Validate JSON (Ctrl+Enter)'
+  })
+
+  registerShortcut({
+    key: 'f',
+    ctrlKey: true,
+    shiftKey: true,
+    action: handleFormat,
+    description: 'Format JSON (Ctrl+Shift+F)'
+  })
+})
+
+// Debounced validation for real-time feedback
+const debouncedValidate = createDebouncedFunction(validateJsonInternal, 500)
+
+/**
+ * Main validation handler
+ */
+async function handleValidate(): Promise<void> {
+  if (!jsonInput.value.trim()) {
+    setError('Please enter JSON to validate')
+    return
+  }
+
+  await processJson(async () => {
+    validateJsonInternal()
+    
+    if (isValid.value) {
+      saveToHistoryList(
+        `Valid JSON (${formatBytes(stats.value.size)})`,
+        {
+          input: jsonInput.value,
+          stats: stats.value
+        }
+      )
+      
+      globalToast.showSuccess('JSON Valid', 'Your JSON syntax is correct!')
+    }
+  })
+}
+
+/**
+ * Internal validation logic
+ */
+function validateJsonInternal(): void {
+  try {
+    setError(null)
+    
+    // Parse and validate JSON
+    const parsed = jsonlint.parse(jsonInput.value)
+    
+    // Calculate statistics
+    stats.value = calculateJsonStats(parsed, jsonInput.value)
+    
+    validationResult.value = 'Valid JSON'
+    isValid.value = true
+    
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Invalid JSON'
+    validationResult.value = errorMessage
+    isValid.value = false
+    
+    // Reset stats on error
+    stats.value = {
+      objects: 0,
+      arrays: 0,
+      values: 0,
+      depth: 0,
+      size: jsonInput.value.length
+    }
+  }
+}
+
+/**
+ * Calculate JSON statistics
+ */
+function calculateJsonStats(obj: unknown, originalString: string): JsonStatistics {
+  let objects = 0
+  let arrays = 0
+  let values = 0
+  let maxDepth = 0
+
+  function traverse(item: unknown, depth: number): void {
+    maxDepth = Math.max(maxDepth, depth)
+
+    if (Array.isArray(item)) {
+      arrays++
+      item.forEach(subItem => traverse(subItem, depth + 1))
+    } else if (item !== null && typeof item === 'object') {
+      objects++
+      Object.values(item as Record<string, unknown>).forEach(value => 
+        traverse(value, depth + 1)
+      )
+    } else {
+      values++
+    }
+  }
+
+  traverse(obj, 1)
+
+  return {
+    objects,
+    arrays,
+    values,
+    depth: maxDepth,
+    size: originalString.length
+  }
+}
+
+/**
+ * Format JSON with proper indentation
+ */
+function handleFormat(): void {
+  const formatted = formatJsonString(jsonInput.value, 2)
+  if (formatted) {
+    jsonInput.value = formatted
+    globalToast.showSuccess('JSON Formatted', 'Your JSON has been formatted')
+    debouncedValidate()
+  } else {
+    globalToast.showError('Format Error', 'Unable to format invalid JSON')
+  }
+}
+
+/**
+ * Clear input and results
+ */
+function handleClear(): void {
+  jsonInput.value = ''
+  validationResult.value = ''
+  isValid.value = false
+  setError(null)
+}
+
+/**
+ * Clear all data
+ */
+function handleClearAll(): void {
+  handleClear()
+  clearToolState()
+}
+
+/**
+ * Load history item
+ */
+function handleHistorySelect(item: HistoryItem): void {
+  if (item.data && typeof item.data === 'object' && 'input' in item.data) {
+    jsonInput.value = item.data.input as string
+    debouncedValidate()
+    globalToast.showInfo('History Loaded', item.label)
+  }
+}
+
+/**
+ * Format bytes to human readable string
+ */
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} bytes`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+</script>
+
+<style scoped>
+.validation-results {
+  margin-top: 1.5rem;
+}
+
+.validation-success {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.1));
+  border-left: 4px solid var(--success);
+}
+
+.validation-error {
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.1), rgba(239, 68, 68, 0.1));
+  border-left: 4px solid var(--danger);
+}
+
+.json-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.error-details {
+  margin-top: 1rem;
+}
+
+.error-message {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 6px;
+  color: var(--danger);
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .json-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .json-stats {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

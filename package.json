@@ -1,6 +1,6 @@
 {
   "name": "json-util",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "A comprehensive Vue.js application for JSON utilities including diff, escape/unescape, beautify/minify, validation, JSONPath and object conversion",
   "main": "index.js",

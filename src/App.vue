@@ -3,24 +3,30 @@
     <div class="fixed-nav-container" :class="{ 'nav-hidden': isFullscreen && !showNavInFullscreen }">
       <header>
         <div class="title-container">
-          <h1 class="app-title">JSON Utilities</h1>
+          <div class="logo-section">
+            <div class="logo-icon">⚡</div>
+            <div class="title-text">
+              <h1 class="app-title">JSON Utilities v{{ appVersion }}</h1>
+            </div>
+          </div>
           <span v-if="currentSubtitle" class="app-subtitle">{{ currentSubtitle }}</span>
         </div>
         <div class="header-controls">
           <button @click="toggleMenu" class="menu-btn mobile-only">
             <span class="menu-icon"></span>
           </button>
-          <button v-if="isFullscreen" @click="toggleNavInFullscreen" class="nav-toggle-btn"
-            :title="showNavInFullscreen ? 'Hide navigation' : 'Show navigation'">
-            <span class="nav-toggle-icon" :class="{ 'nav-hidden-icon': !showNavInFullscreen }"></span>
-          </button>
-          <button @click="toggleFullscreen" class="fullscreen-btn"
-            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
-            <span class="fullscreen-icon" :class="{ 'exit-fullscreen': isFullscreen }"></span>
-          </button>
-          <div class="theme-toggle">
-            <button @click="toggleTheme" class="theme-btn">
-              {{ isDarkTheme ? '☀️' : '🌙' }}
+          <div class="control-group">
+            <button v-if="isFullscreen" @click="toggleNavInFullscreen" class="control-btn nav-toggle-btn"
+              :title="showNavInFullscreen ? 'Hide navigation' : 'Show navigation'">
+              <span class="nav-toggle-icon" :class="{ 'nav-hidden-icon': !showNavInFullscreen }"></span>
+            </button>
+            <button @click="toggleFullscreen" class="control-btn fullscreen-btn"
+              :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
+              <span class="fullscreen-icon" :class="{ 'exit-fullscreen': isFullscreen }"></span>
+            </button>
+            <button @click="toggleTheme" class="control-btn theme-btn"
+              :title="isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'">
+              <span class="theme-icon">{{ isDarkTheme ? '☀️' : '🌙' }}</span>
             </button>
           </div>
         </div>
@@ -60,14 +66,36 @@
     </main>
 
     <footer class="footer">
-      <p>JSON Utilities - A comprehensive tool for JSON operations</p>
-      <div class="footer-actions">
-        <button @click="clearAllHistories" class="footer-button" title="Clear all saved histories">
-          Clear All History
-        </button>
+      <div class="footer-content">
+        <div class="footer-info">
+          <p class="footer-title">JSON Utilities - A comprehensive tool for JSON operations</p>
+          <div class="footer-meta">
+            <span class="version-info">Version {{ appVersion }}</span>
+            <span class="separator">•</span>
+            <span class="build-info">Built {{ buildYear }}</span>
+            <span class="separator">•</span>
+            <span class="tech-info">Vue 3 + TypeScript</span>
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button @click="clearAllHistories" class="footer-button" title="Clear all saved histories">
+            <span class="button-icon">🗑️</span>
+            Clear All History
+          </button>
+        </div>
       </div>
-      <p class="copyright">© 2025 <a href="https://whatley.xyz/playground" target="_blank" rel="noopener"
-          class="footer-link">Whatley</a></p>
+      <div class="footer-bottom">
+        <p class="copyright">
+          © {{ buildYear }}
+          <a href="https://whatley.xyz/playground" target="_blank" rel="noopener" class="footer-link">Whatley</a>
+          <span class="separator">•</span>
+          <a href="https://github.com/whatley95/json-util" target="_blank" rel="noopener" class="footer-link">
+            <span class="link-icon">📱</span>GitHub
+          </a>
+          <span class="separator">•</span>
+          <span class="license">MIT License</span>
+        </p>
+      </div>
     </footer>
   </div>
 </template>
@@ -76,6 +104,10 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { clearAllHistory } from './utils/localStorage';
+
+// App version from build time
+const appVersion = __APP_VERSION__;
+const buildYear = new Date().getFullYear();
 
 // Theme handling
 const isDarkTheme = ref(true);
@@ -223,16 +255,33 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1.25rem 2rem;
   margin-bottom: 1rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.05));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
   z-index: 200;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
   animation: fadeIn 0.5s ease-out;
+  border-radius: 0 0 16px 16px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.3));
+  animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
@@ -247,35 +296,43 @@ header {
   }
 }
 
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.3));
+  }
+
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(67, 97, 238, 0.5));
+  }
+}
+
+.title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .app-title {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   position: relative;
-  text-shadow: 0 2px 10px rgba(67, 97, 238, 0.2);
-}
-
-.app-title::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 40%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary), transparent);
-  border-radius: 3px;
 }
 
 .title-container {
   display: flex;
-  align-items: baseline;
-  gap: 15px;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
 }
 
 .app-subtitle {
@@ -287,66 +344,63 @@ header {
   position: relative;
   padding-left: 20px;
   animation: fadeIn 0.5s ease-out;
+  border-left: 2px solid var(--accent);
+  padding-left: 15px;
 }
 
-.app-subtitle:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  height: 16px;
-  width: 2px;
-  background: var(--accent);
-  transform: translateY(-50%);
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text);
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .theme-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
 }
 
-.theme-btn:hover {
-  transform: rotate(30deg) scale(1.2);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  background: rgba(255, 255, 255, 0.1);
+.theme-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
 }
 
-.fullscreen-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-}
-
-.fullscreen-btn:hover {
-  transform: scale(1.1);
-  background: rgba(255, 255, 255, 0.1);
+.theme-btn:hover .theme-icon {
+  transform: rotate(20deg) scale(1.1);
 }
 
 .fullscreen-icon {
   position: relative;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border: 2px solid currentColor;
   border-radius: 2px;
 }
@@ -354,40 +408,39 @@ header {
 .fullscreen-icon::before {
   content: '';
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-top: 2px solid currentColor;
   border-right: 2px solid currentColor;
-  top: -4px;
-  right: -4px;
+  top: -3px;
+  right: -3px;
 }
 
 .fullscreen-icon::after {
   content: '';
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-bottom: 2px solid currentColor;
   border-left: 2px solid currentColor;
-  bottom: -4px;
-  left: -4px;
+  bottom: -3px;
+  left: -3px;
 }
 
 .exit-fullscreen {
   border-width: 0;
-  height: 16px;
 }
 
 .exit-fullscreen::before {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   top: 0px;
   right: 0px;
 }
 
 .exit-fullscreen::after {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   bottom: 0px;
   left: 0px;
 }
@@ -411,59 +464,138 @@ header {
 }
 
 .footer {
-  margin-top: 2rem;
-  padding: 1.5rem;
+  margin-top: 3rem;
+  padding: 2rem 2rem 1.5rem;
   text-align: center;
   color: var(--text-muted);
   font-size: 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.05));
+  backdrop-filter: blur(8px);
+  border-radius: 16px 16px 0 0;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.version-info {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.build-info,
+.tech-info {
+  color: var(--text-muted);
+}
+
+.separator {
+  color: var(--text-muted);
+  opacity: 0.5;
 }
 
 .footer-actions {
-  margin: 1rem 0;
   display: flex;
   justify-content: center;
+  gap: 1rem;
 }
 
 .footer-button {
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-muted);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .footer-button:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
   color: var(--text);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.button-icon {
+  font-size: 1rem;
+}
+
+.footer-bottom {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 1rem;
+}
+
+.copyright {
+  margin: 0;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .footer-link {
   color: var(--accent);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: all 0.3s ease;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .footer-link:hover {
   color: var(--primary);
   text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link-icon {
+  font-size: 0.9rem;
+}
+
+.license {
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .icon {
   display: inline-block;
   margin-right: 0.5rem;
-}
-
-.copyright {
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
 }
 
 .fixed-nav-container {
@@ -616,27 +748,6 @@ header {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
-.nav-toggle-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-}
-
-.nav-toggle-btn:hover {
-  transform: scale(1.1);
-  background: rgba(255, 255, 255, 0.1);
-}
-
 .nav-toggle-icon {
   position: relative;
   width: 18px;
@@ -729,25 +840,61 @@ header {
 @media (max-width: 768px) {
   header {
     padding: 1rem;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .logo-section {
+    gap: 8px;
+  }
+
+  .logo-icon {
+    font-size: 1.6rem;
   }
 
   .app-title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 
   .title-container {
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 8px;
   }
 
   .app-subtitle {
     font-size: 0.9rem;
-    padding-left: 0;
+    padding-left: 12px;
   }
 
-  .app-subtitle:before {
-    display: none;
+  .control-group {
+    gap: 4px;
+    padding: 2px;
+  }
+
+  .control-btn {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+
+  .footer {
+    padding: 1.5rem 1rem 1rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .footer-content {
+    gap: 1rem;
+  }
+
+  .footer-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .copyright {
+    flex-direction: column;
+    gap: 0.25rem;
+    line-height: 1.6;
   }
 
   .mobile-only {

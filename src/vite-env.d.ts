@@ -6,6 +6,9 @@ declare module '*.vue' {
 
 /// <reference types="vite/client" />
 
+declare const __APP_VERSION__: string
+declare const __APP_NAME__: string
+
 interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string
   readonly BASE_URL: string
