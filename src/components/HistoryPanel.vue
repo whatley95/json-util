@@ -107,35 +107,38 @@ function formatDate(timestamp: number): string {
 
 <style scoped>
 .history-panel {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 0.875rem;
+    margin-bottom: 1rem;
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .history-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 .empty-history {
     text-align: center;
-    padding: 1rem 0;
+    padding: 0.75rem 0;
     color: var(--text-muted);
+    font-size: 0.85rem;
 }
 
 .history-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 300px;
+    max-height: 240px;
     overflow-y: auto;
 }
 
@@ -143,30 +146,31 @@ function formatDate(timestamp: number): string {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    border-left: 3px solid var(--primary);
+    margin-bottom: 0.35rem;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    transition: background-color 0.15s ease;
+    border-left: 2px solid var(--primary);
 }
 
 .history-item:hover {
-    background-color: rgba(255, 255, 255, 0.12);
+    background: rgba(var(--primary-rgb), 0.06);
 }
 
 .history-item-content {
     flex: 1;
-    padding: 0.75rem;
+    padding: 0.5rem 0.75rem;
     cursor: pointer;
 }
 
 .history-item-label {
     font-weight: 500;
-    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.15rem;
 }
 
 .history-item-date {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--text-muted);
 }
 
@@ -174,27 +178,32 @@ function formatDate(timestamp: number): string {
     background: none;
     border: none;
     color: var(--text-muted);
-    padding: 0.5rem;
+    padding: 0.35rem;
     cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s, color 0.2s;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.15s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    height: 28px;
-    width: 28px;
+    border-radius: var(--radius-sm);
+    margin-right: 0.35rem;
+    height: 24px;
+    width: 24px;
+    font-size: 0.75rem;
+}
+
+.history-item:hover .delete-button {
+    opacity: 0.6;
 }
 
 .delete-button:hover {
-    opacity: 1;
-    color: var(--error, #ff6b6b);
-    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 1 !important;
+    color: var(--danger);
+    background: rgba(248, 113, 113, 0.1);
 }
 
 .icon-small {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     display: inline-block;
 }
 </style>

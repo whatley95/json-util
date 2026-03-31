@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import jsonlint from 'jsonlint-mod'
 import HistoryPanel from '../components/HistoryPanel.vue'
 import { saveToHistory, saveToolState, getToolState, type HistoryItem } from '../utils/localStorage'
@@ -199,6 +199,29 @@ function loadHistoryItem(item: HistoryItem) {
     successMessage.value = `Loaded: ${item.label}`
   }
 }
+
+// Save current state to localStorage when component unmounts
+function saveState() {
+  saveToolState('validate', {
+    jsonInput: jsonInput.value
+  });
+}
+
+// Load previous state if available
+function loadPreviousState() {
+  const state = getToolState('validate');
+  if (state) {
+    jsonInput.value = state.jsonInput || '';
+  }
+}
+
+onMounted(() => {
+  loadPreviousState();
+});
+
+onUnmounted(() => {
+  saveState();
+});
 </script>
 
 <style scoped>

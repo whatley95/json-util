@@ -2,16 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/whatley95/json-util)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Vue](https://img.shields.io/badge/## 📬 Contact & Links
-
-- **Live Demo**: [JSON Utilities](https://json-util.whatley.xyz) (Cloudflare Pages)
-- **GitHub**: [whatley95/json-util](https://github.com/whatley95/json-util)
-- **Personal Website**: [whatley.xyz](https://whatley.xyz/)
-- **Issues**: [Report bugs or request features](https://github.com/whatley95/json-util/issues)
-
----
-
-Made with ❤️ by [Whatley](https://whatley.xyz/)4-4FC08D.svg)](https://vuejs.org/)
+[![Vue](https://img.shields.io/badge/Vue-3.3.4-4FC08D.svg)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-3178C6.svg)](https://www.typescriptlang.org/)
 
 A modern, comprehensive web application for working with JSON data. This project provides multiple tools to manipulate, validate, compare, and explore JSON data through an intuitive user interface.
@@ -56,22 +47,23 @@ json-util/
 ├── public/                 # Static assets
 │   ├── _headers           # Cloudflare Pages headers
 │   ├── _redirects         # SPA routing redirects
-│   └── favicon.svg
+│   ├── _routes.json       # Cloudflare routing config
+│   ├── favicon.svg        # App favicon
+│   └── robots.txt         # Search engine directives
 ├── src/
 │   ├── components/        # Reusable Vue components
-│   │   ├── base/         # Base component library
-│   │   └── HistoryPanel.vue
-│   ├── composables/      # Vue 3 composables
+│   │   └── HistoryPanel.vue # History sidebar panel
+│   ├── composables/       # Vue 3 composables
 │   │   ├── useJsonTool.ts # Common tool functionality
-│   │   └── useToast.ts   # Toast notifications
-│   ├── router/           # Vue Router configuration
+│   │   └── useToast.ts    # Toast notifications
+│   ├── router/            # Vue Router configuration
 │   │   └── index.ts
-│   ├── types/            # TypeScript type definitions
-│   │   ├── index.ts      # Core application types
-│   │   └── *.d.ts        # Third-party library types
-│   ├── utils/            # Utility functions
-│   │   └── localStorage.ts # Local storage management
-│   ├── views/            # Page components
+│   ├── types/             # TypeScript type definitions
+│   │   ├── index.ts       # Core application types
+│   │   └── *.d.ts         # Third-party library types
+│   ├── utils/             # Utility functions
+│   │   └── localStorage.ts # Local storage & history management
+│   ├── views/             # Page components
 │   │   ├── HomeView.vue
 │   │   ├── JsonDiffView.vue
 │   │   ├── JsonEscapeView.vue
@@ -79,12 +71,13 @@ json-util/
 │   │   ├── JsonConverterView.vue
 │   │   ├── JsonValidateView.vue
 │   │   └── JsonPathView.vue
-│   ├── App.vue           # Root component
-│   ├── main.ts           # Application entry point
-│   └── style.css         # Global styles
-├── vite.config.ts        # Vite configuration
-├── tsconfig.json         # TypeScript configuration
-└── package.json          # Dependencies and scripts
+│   ├── App.vue            # Root component
+│   ├── main.ts            # Application entry point
+│   └── style.css          # Global styles
+├── start.js               # Node.js dev server launcher
+├── vite.config.ts         # Vite configuration
+├── tsconfig.json          # TypeScript configuration
+└── package.json           # Dependencies and scripts
 ```
 
 ## 📋 Usage Guide
@@ -249,10 +242,12 @@ npm run format
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📬 Contact
+## 📬 Contact & Links
 
-Project Link: [https://github.com/whatley95/json-util](https://github.com/whatley95/json-util)  
-Personal Website: [https://whatley.xyz/](https://whatley.xyz/)
+- **Live Demo**: [JSON Utilities](https://json-util.whatley.xyz) (Cloudflare Pages)
+- **GitHub**: [whatley95/json-util](https://github.com/whatley95/json-util)
+- **Personal Website**: [whatley.xyz](https://whatley.xyz/)
+- **Issues**: [Report bugs or request features](https://github.com/whatley95/json-util/issues)
 
 ---
 

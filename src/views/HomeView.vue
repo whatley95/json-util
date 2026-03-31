@@ -1,49 +1,46 @@
 <template>
   <div class="container">
-    <p class="tool-description">A comprehensive tool for working with JSON data</p>
+    <div class="hero">
+      <h1 class="hero-title">JSON Utilities</h1>
+      <p class="hero-desc">Tools for working with JSON — diff, format, validate, query, and more.</p>
+    </div>
 
     <div class="tools-grid">
-      <div class="card tool-card">
-        <div class="tool-icon">🔄</div>
-        <h3>JSON Diff</h3>
-        <p>Compare two JSON objects and see the differences highlighted</p>
-        <router-link to="/diff" class="btn">Try JSON Diff</router-link>
-      </div>
+      <router-link to="/diff" class="tool-card card">
+        <div class="tool-indicator" style="--tool-color: var(--primary)"></div>
+        <h3>Diff</h3>
+        <p>Compare two JSON objects and visualize differences</p>
+      </router-link>
 
-      <div class="card tool-card">
-        <div class="tool-icon">🔒</div>
-        <h3>Escape/Unescape</h3>
-        <p>Escape special characters in JSON strings or unescape them</p>
-        <router-link to="/escape" class="btn">Try Escape Tool</router-link>
-      </div>
+      <router-link to="/escape" class="tool-card card">
+        <div class="tool-indicator" style="--tool-color: var(--success)"></div>
+        <h3>Escape / Unescape</h3>
+        <p>Escape or unescape special characters in JSON strings</p>
+      </router-link>
 
-      <div class="card tool-card">
-        <div class="tool-icon">✨</div>
-        <h3>Beautify/Minify</h3>
-        <p>Format JSON beautifully with indentation or minify to save space</p>
-        <router-link to="/beautify" class="btn">Try Beautify Tool</router-link>
-      </div>
+      <router-link to="/beautify" class="tool-card card">
+        <div class="tool-indicator" style="--tool-color: var(--secondary)"></div>
+        <h3>Beautify / Minify</h3>
+        <p>Format JSON with indentation or minify to save space</p>
+      </router-link>
 
-      <div class="card tool-card">
-        <div class="tool-icon">🔄</div>
+      <router-link to="/converter" class="tool-card card">
+        <div class="tool-indicator" style="--tool-color: var(--warning)"></div>
         <h3>Object Converter</h3>
         <p>Convert between JSON strings and JavaScript objects</p>
-        <router-link to="/converter" class="btn">Try Converter</router-link>
-      </div>
+      </router-link>
 
-      <div class="card tool-card">
-        <div class="tool-icon">✓</div>
-        <h3>JSON Validate</h3>
-        <p>Validate JSON structure and syntax with detailed error messages</p>
-        <router-link to="/validate" class="btn">Try Validator</router-link>
-      </div>
+      <router-link to="/validate" class="tool-card card">
+        <div class="tool-indicator" style="--tool-color: var(--danger)"></div>
+        <h3>Validate</h3>
+        <p>Check JSON syntax and view structure statistics</p>
+      </router-link>
 
-      <div class="card tool-card">
-        <div class="tool-icon">🔍</div>
-        <h3>JSON Path Finder</h3>
-        <p>Explore and extract data from complex JSON using JSONPath expressions</p>
-        <router-link to="/path" class="btn">Try JSONPath</router-link>
-      </div>
+      <router-link to="/path" class="tool-card card">
+        <div class="tool-indicator" style="--tool-color: var(--primary)"></div>
+        <h3>JSONPath</h3>
+        <p>Query and extract data using JSONPath expressions</p>
+      </router-link>
     </div>
   </div>
 </template>
@@ -53,70 +50,69 @@
 </script>
 
 <style scoped>
+.hero {
+  text-align: center;
+  padding: 2rem 0 0.5rem;
+}
+
+.hero-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.hero-desc {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0 auto 1.5rem;
+  max-width: 480px;
+}
+
 .tools-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  margin: 2rem 0;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  margin: 1rem 0 2rem;
 }
 
 .tool-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2rem;
-  transition: all 0.3s ease;
+  padding: 1.25rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
 }
 
 .tool-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-color: rgba(var(--primary-rgb), 0.3);
 }
 
-.tool-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  border-radius: 50%;
-  width: 70px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+.tool-indicator {
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--tool-color, var(--primary));
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
 }
 
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-h3 {
-  margin: 1rem 0;
-  font-size: 1.5rem;
-}
-
-.container>p {
-  font-size: 1.2rem;
-  color: var(--text-muted);
-  max-width: 600px;
-  margin: 0 auto 2rem;
+.tool-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .tool-card p {
-  margin-bottom: 2rem;
-  flex-grow: 1;
-}
-
-.tool-card .btn {
-  width: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 </style>

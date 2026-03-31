@@ -4,15 +4,15 @@
       <header>
         <div class="title-container">
           <div class="logo-section">
-            <div class="logo-icon">⚡</div>
+            <div class="logo-icon">{&thinsp;}</div>
             <div class="title-text">
-              <h1 class="app-title">JSON Utilities v{{ appVersion }}</h1>
+              <h1 class="app-title">JSON Utilities <span class="app-version">v{{ appVersion }}</span></h1>
             </div>
           </div>
           <span v-if="currentSubtitle" class="app-subtitle">{{ currentSubtitle }}</span>
         </div>
         <div class="header-controls">
-          <button @click="toggleMenu" class="menu-btn mobile-only">
+          <button @click="toggleMenu" class="menu-btn mobile-only" aria-label="Toggle menu">
             <span class="menu-icon"></span>
           </button>
           <div class="control-group">
@@ -34,31 +34,15 @@
 
       <nav class="nav" :class="{ 'menu-open': isMenuOpen }">
         <div class="nav-container">
-          <router-link to="/" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">🏠</span> Home
-          </router-link>
-          <router-link to="/diff" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">🔄</span> JSON Diff
-          </router-link>
-          <router-link to="/escape" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">🔒</span> Escape/Unescape
-          </router-link>
-          <router-link to="/beautify" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">✨</span> Beautify/Minify
-          </router-link>
-          <router-link to="/converter" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">🔄</span> Object Converter
-          </router-link>
-          <router-link to="/validate" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">✓</span> Validate
-          </router-link>
-          <router-link to="/path" class="nav-link" @click="isMenuOpen = false">
-            <span class="icon">🔍</span> JSONPath
-          </router-link>
+          <router-link to="/" class="nav-link" @click="isMenuOpen = false">Home</router-link>
+          <router-link to="/diff" class="nav-link" @click="isMenuOpen = false">Diff</router-link>
+          <router-link to="/escape" class="nav-link" @click="isMenuOpen = false">Escape</router-link>
+          <router-link to="/beautify" class="nav-link" @click="isMenuOpen = false">Beautify</router-link>
+          <router-link to="/converter" class="nav-link" @click="isMenuOpen = false">Converter</router-link>
+          <router-link to="/validate" class="nav-link" @click="isMenuOpen = false">Validate</router-link>
+          <router-link to="/path" class="nav-link" @click="isMenuOpen = false">JSONPath</router-link>
         </div>
       </nav>
-
-      <div class="nav-shadow" v-if="scrolled"></div>
     </div>
 
     <main class="main-content">
@@ -67,34 +51,24 @@
 
     <footer class="footer">
       <div class="footer-content">
-        <div class="footer-info">
-          <p class="footer-title">JSON Utilities - A comprehensive tool for JSON operations</p>
-          <div class="footer-meta">
-            <span class="version-info">Version {{ appVersion }}</span>
-            <span class="separator">•</span>
-            <span class="build-info">Built {{ buildYear }}</span>
-            <span class="separator">•</span>
-            <span class="tech-info">Vue 3 + TypeScript</span>
-          </div>
-        </div>
-        <div class="footer-actions">
-          <button @click="clearAllHistories" class="footer-button" title="Clear all saved histories">
-            <span class="button-icon">🗑️</span>
-            Clear All History
+        <div class="footer-row">
+          <span class="footer-brand">JSON Utilities v{{ appVersion }}</span>
+          <span class="footer-sep">&middot;</span>
+          <span class="footer-tech">Vue 3 + TypeScript</span>
+          <span class="footer-sep">&middot;</span>
+          <button @click="clearAllHistories" class="footer-clear-btn" title="Clear all saved histories">
+            Clear History
           </button>
         </div>
-      </div>
-      <div class="footer-bottom">
-        <p class="copyright">
-          © {{ buildYear }}
-          <a href="https://whatley.xyz/playground" target="_blank" rel="noopener" class="footer-link">Whatley</a>
-          <span class="separator">•</span>
-          <a href="https://github.com/whatley95/json-util" target="_blank" rel="noopener" class="footer-link">
-            <span class="link-icon">📱</span>GitHub
-          </a>
-          <span class="separator">•</span>
-          <span class="license">MIT License</span>
-        </p>
+        <div class="footer-row footer-bottom">
+          <span>&copy; {{ buildYear }}
+            <a href="https://whatley.xyz/playground" target="_blank" rel="noopener" class="footer-link">Whatley</a>
+          </span>
+          <span class="footer-sep">&middot;</span>
+          <a href="https://github.com/whatley95/json-util" target="_blank" rel="noopener" class="footer-link">GitHub</a>
+          <span class="footer-sep">&middot;</span>
+          <span class="footer-license">MIT License</span>
+        </div>
       </div>
     </footer>
   </div>
@@ -113,8 +87,6 @@ const buildYear = new Date().getFullYear();
 const isDarkTheme = ref(true);
 // Menu state for mobile
 const isMenuOpen = ref(false);
-// Scroll state for shadow effect
-const scrolled = ref(false);
 // Fullscreen state
 const isFullscreen = ref(false);
 // Controls visibility of navigation when in fullscreen mode
@@ -130,13 +102,7 @@ function toggleTheme() {
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value;
-  // Prevent body scrolling when menu is open on mobile
   document.body.style.overflow = isMenuOpen.value ? 'hidden' : '';
-}
-
-// Handle scroll events to add shadow and effects
-function handleScroll() {
-  scrolled.value = window.scrollY > 10;
 }
 
 // Toggle fullscreen mode
@@ -224,18 +190,13 @@ onMounted(() => {
   }
 
   // Add event listeners
-  window.addEventListener('scroll', handleScroll);
   document.addEventListener('fullscreenchange', handleFullscreenChange);
   document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
   document.addEventListener('msfullscreenchange', handleFullscreenChange);
-
-  // Initial check
-  handleScroll();
 });
 
 onUnmounted(() => {
   // Clean up event listeners
-  window.removeEventListener('scroll', handleScroll);
   document.removeEventListener('fullscreenchange', handleFullscreenChange);
   document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
   document.removeEventListener('msfullscreenchange', handleFullscreenChange);
@@ -249,169 +210,130 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding: 0;
 }
 
+/* ── Header ── */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 2rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.05));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 200;
   backdrop-filter: blur(12px);
-  animation: fadeIn 0.5s ease-out;
-  border-radius: 0 0 16px 16px;
 }
 
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .logo-icon {
-  font-size: 2rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.3));
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    filter: drop-shadow(0 2px 4px rgba(67, 97, 238, 0.3));
-  }
-
-  50% {
-    transform: scale(1.05);
-    filter: drop-shadow(0 4px 8px rgba(67, 97, 238, 0.5));
-  }
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 .title-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .app-title {
-  font-size: 1.9rem;
+  font-size: 1.15rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: 0.5px;
-  position: relative;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.app-version {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .title-container {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   flex: 1;
 }
 
 .app-subtitle {
-  font-size: 1.1rem;
-  color: var(--accent);
-  opacity: 0.9;
+  font-size: 0.85rem;
+  color: var(--text-muted);
   font-weight: 500;
   white-space: nowrap;
-  position: relative;
-  padding-left: 20px;
-  animation: fadeIn 0.5s ease-out;
-  border-left: 2px solid var(--accent);
-  padding-left: 15px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
 }
 
+/* ── Controls ── */
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .control-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .control-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  color: var(--text);
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
 }
 
 .control-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-}
-
-.theme-btn {
-  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
 }
 
 .theme-icon {
-  font-size: 1.2rem;
-  transition: transform 0.3s ease;
+  font-size: 1rem;
+  transition: transform 0.2s ease;
 }
 
 .theme-btn:hover .theme-icon {
-  transform: rotate(20deg) scale(1.1);
+  transform: rotate(15deg);
 }
 
 .fullscreen-icon {
   position: relative;
-  width: 14px;
-  height: 14px;
-  border: 2px solid currentColor;
-  border-radius: 2px;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentColor;
+  border-radius: 1.5px;
 }
 
 .fullscreen-icon::before {
   content: '';
   position: absolute;
-  width: 5px;
-  height: 5px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
+  width: 4px;
+  height: 4px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
   top: -3px;
   right: -3px;
 }
@@ -419,10 +341,10 @@ header {
 .fullscreen-icon::after {
   content: '';
   position: absolute;
-  width: 5px;
-  height: 5px;
-  border-bottom: 2px solid currentColor;
-  border-left: 2px solid currentColor;
+  width: 4px;
+  height: 4px;
+  border-bottom: 1.5px solid currentColor;
+  border-left: 1.5px solid currentColor;
   bottom: -3px;
   left: -3px;
 }
@@ -432,172 +354,20 @@ header {
 }
 
 .exit-fullscreen::before {
-  width: 6px;
-  height: 6px;
-  top: 0px;
-  right: 0px;
+  width: 5px;
+  height: 5px;
+  top: 0;
+  right: 0;
 }
 
 .exit-fullscreen::after {
-  width: 6px;
-  height: 6px;
-  bottom: 0px;
-  left: 0px;
+  width: 5px;
+  height: 5px;
+  bottom: 0;
+  left: 0;
 }
 
-.main-content {
-  flex: 1;
-  padding: 0 1rem;
-  animation: contentFadeIn 0.6s ease-out;
-}
-
-@keyframes contentFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.footer {
-  margin-top: 3rem;
-  padding: 2rem 2rem 1.5rem;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.05));
-  backdrop-filter: blur(8px);
-  border-radius: 16px 16px 0 0;
-}
-
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footer-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.footer-title {
-  margin: 0;
-  font-size: 1.1rem;
-  color: var(--text);
-  font-weight: 600;
-}
-
-.footer-meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
-.version-info {
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.build-info,
-.tech-info {
-  color: var(--text-muted);
-}
-
-.separator {
-  color: var(--text-muted);
-  opacity: 0.5;
-}
-
-.footer-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.footer-button {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-muted);
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.footer-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--text);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.button-icon {
-  font-size: 1rem;
-}
-
-.footer-bottom {
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  margin-top: 1rem;
-}
-
-.copyright {
-  margin: 0;
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.footer-link {
-  color: var(--accent);
-  text-decoration: none;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.footer-link:hover {
-  color: var(--primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.link-icon {
-  font-size: 0.9rem;
-}
-
-.license {
-  color: var(--text-muted);
-  opacity: 0.8;
-}
-
-.icon {
-  display: inline-block;
-  margin-right: 0.5rem;
-}
-
+/* ── Navigation ── */
 .fixed-nav-container {
   position: sticky;
   top: 0;
@@ -605,95 +375,203 @@ header {
   width: 100%;
 }
 
-.nav-shadow {
-  position: absolute;
-  bottom: -10px;
-  left: 0;
-  right: 0;
-  height: 10px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
-  z-index: 1;
-  pointer-events: none;
-}
-
 .nav {
   overflow-x: auto;
-  padding: 0.75rem;
+  padding: 0.35rem 1rem;
   white-space: nowrap;
-  margin-bottom: 2rem;
-  background: linear-gradient(to right, var(--surface), rgba(15, 52, 96, 0.9));
-  border-radius: 0 0 12px 12px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s ease;
 }
 
 .nav-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 0.25rem;
   flex-wrap: nowrap;
 }
 
 .nav::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
 }
 
 .nav::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  background: transparent;
 }
 
 .nav::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 4px;
+  background: rgba(var(--primary-rgb), 0.3);
+  border-radius: 3px;
 }
 
 .nav-link {
   position: relative;
-  margin: 0 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background-color 0.15s ease;
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .nav-link.router-link-active {
-  background: rgba(var(--primary-rgb), 0.15);
-  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
 }
 
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background: var(--accent);
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-  border-radius: 3px;
-  opacity: 0;
+/* ── Main ── */
+.main-content {
+  flex: 1;
+  padding: 0 1rem;
 }
 
-.nav-link:hover::after {
-  width: 80%;
-  opacity: 1;
+/* ── Footer ── */
+.footer {
+  margin-top: 2rem;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--surface);
 }
 
-.nav-link.active::after {
-  width: 100%;
-  opacity: 1;
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.header-controls {
+.footer-row {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
+.footer-brand {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.footer-tech {
+  color: var(--text-muted);
+}
+
+.footer-sep {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.footer-clear-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.footer-clear-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.footer-bottom {
+  font-size: 0.75rem;
+}
+
+.footer-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-license {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ── Tool description ── */
+.tool-description {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  max-width: 800px;
+  line-height: 1.5;
+}
+
+/* ── Fullscreen overrides ── */
+.fixed-nav-container.nav-hidden .nav {
+  display: none;
+}
+
+.fixed-nav-container.nav-hidden + .main-content {
+  padding-top: 1rem;
+}
+
+.nav-hidden header {
+  margin-bottom: 0;
+}
+
+#app.is-fullscreen .main-content {
+  padding: 1rem 2rem;
+}
+
+/* ── Nav toggle icon ── */
+.nav-toggle-icon {
+  position: relative;
+  width: 16px;
+  height: 10px;
+}
+
+.nav-toggle-icon:before,
+.nav-toggle-icon:after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 1.5px;
+  background: currentColor;
+  left: 0;
+}
+
+.nav-toggle-icon:before {
+  top: 0;
+}
+
+.nav-toggle-icon:after {
+  bottom: 0;
+  box-shadow: 0 -4px 0 currentColor;
+}
+
+.nav-hidden-icon:before,
+.nav-hidden-icon:after {
+  top: 4px;
+}
+
+.nav-hidden-icon:after {
+  box-shadow: none;
+}
+
+/* ── Mobile ── */
 .mobile-only {
   display: none;
 }
@@ -704,7 +582,7 @@ header {
   width: 32px;
   height: 32px;
   position: relative;
-  margin-right: 1rem;
+  margin-right: 0.75rem;
   cursor: pointer;
 }
 
@@ -712,27 +590,27 @@ header {
 .menu-icon::before,
 .menu-icon::after {
   position: absolute;
-  width: 24px;
-  height: 3px;
+  width: 20px;
+  height: 2px;
   background: var(--text);
   border-radius: 2px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .menu-icon {
-  top: 14px;
-  left: 4px;
+  top: 15px;
+  left: 6px;
 }
 
 .menu-icon::before {
   content: '';
-  top: -8px;
+  top: -7px;
   left: 0;
 }
 
 .menu-icon::after {
   content: '';
-  top: 8px;
+  top: 7px;
   left: 0;
 }
 
@@ -748,153 +626,44 @@ header {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
-.nav-toggle-icon {
-  position: relative;
-  width: 18px;
-  height: 12px;
-}
-
-.nav-toggle-icon:before,
-.nav-toggle-icon:after {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 2px;
-  background: currentColor;
-  left: 0;
-}
-
-.nav-toggle-icon:before {
-  top: 0;
-}
-
-.nav-toggle-icon:after {
-  bottom: 0;
-}
-
-.nav-toggle-icon::after {
-  box-shadow: 0 -5px 0 currentColor;
-}
-
-.nav-hidden-icon:before,
-.nav-hidden-icon:after {
-  top: 5px;
-}
-
-.nav-hidden-icon:after {
-  box-shadow: none;
-}
-
-/* Style for tool descriptions */
-.tool-description {
-  font-size: 1.2rem;
-  color: var(--text-muted);
-  margin-bottom: 2rem;
-  max-width: 800px;
-  line-height: 1.6;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Hidden navigation styles */
-.fixed-nav-container.nav-hidden .nav,
-.fixed-nav-container.nav-hidden .nav-shadow {
-  display: none;
-}
-
-.fixed-nav-container.nav-hidden+.main-content {
-  padding-top: 1rem;
-}
-
-/* Adjust header for hidden navigation */
-.nav-hidden header {
-  margin-bottom: 0;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-}
-
-/* Adjust fullscreen styles */
-:fullscreen #app .fixed-nav-container.nav-hidden header,
-:-webkit-full-screen #app .fixed-nav-container.nav-hidden header,
-:-ms-fullscreen #app .fixed-nav-container.nav-hidden header {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-:fullscreen #app .fixed-nav-container.nav-hidden,
-:-webkit-full-screen #app .fixed-nav-container.nav-hidden,
-:-ms-fullscreen #app .fixed-nav-container.nav-hidden {
-  margin-bottom: 0.5rem;
-}
-
-:fullscreen #app.is-fullscreen .fixed-nav-container.nav-hidden+.main-content,
-:-webkit-full-screen #app.is-fullscreen .fixed-nav-container.nav-hidden+.main-content,
-:-ms-fullscreen #app.is-fullscreen .fixed-nav-container.nav-hidden+.main-content {
-  padding-top: 0.5rem;
-}
-
-#app.is-fullscreen .main-content {
-  padding: 1rem 2rem;
-  transition: padding 0.3s ease;
+.icon {
+  display: inline-block;
+  margin-right: 0.4rem;
 }
 
 @media (max-width: 768px) {
   header {
-    padding: 1rem;
-    border-radius: 0 0 12px 12px;
-  }
-
-  .logo-section {
-    gap: 8px;
+    padding: 0.6rem 0.75rem;
   }
 
   .logo-icon {
-    font-size: 1.6rem;
+    font-size: 1rem;
   }
 
   .app-title {
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
 
   .title-container {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 4px;
   }
 
   .app-subtitle {
-    font-size: 0.9rem;
-    padding-left: 12px;
-  }
-
-  .control-group {
-    gap: 4px;
-    padding: 2px;
+    font-size: 0.75rem;
+    padding-left: 0;
+    border-left: none;
   }
 
   .control-btn {
-    width: 32px;
-    height: 32px;
-    padding: 6px;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
   }
 
   .footer {
-    padding: 1.5rem 1rem 1rem;
-    border-radius: 12px 12px 0 0;
-  }
-
-  .footer-content {
-    gap: 1rem;
-  }
-
-  .footer-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .copyright {
-    flex-direction: column;
-    gap: 0.25rem;
-    line-height: 1.6;
+    padding: 1rem 0.75rem;
   }
 
   .mobile-only {
@@ -903,22 +672,22 @@ header {
 
   .nav {
     position: fixed;
-    top: 64px;
+    top: 48px;
     left: 0;
     right: 0;
     height: 0;
     overflow: hidden;
     margin: 0;
     padding: 0;
-    transition: height 0.3s ease;
+    transition: height 0.2s ease;
     border-radius: 0;
     z-index: 300;
   }
 
   .nav.menu-open {
-    height: calc(100vh - 64px);
+    height: calc(100vh - 48px);
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   .nav-container {
@@ -927,9 +696,8 @@ header {
   }
 
   .nav-link {
-    margin: 0.5rem 0;
-    padding: 1rem;
-    font-size: 1.1rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
     text-align: left;
   }
 }

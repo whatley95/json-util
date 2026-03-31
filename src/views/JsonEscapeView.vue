@@ -74,7 +74,8 @@ const unescapeJson = () => {
   successMessage.value = ''
 
   try {
-    outputText.value = JSON.parse(inputText.value)
+    const parsed = JSON.parse(inputText.value)
+    outputText.value = typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2)
     successMessage.value = 'JSON unescaped successfully!'
 
     // Save to history

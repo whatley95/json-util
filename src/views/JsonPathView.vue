@@ -46,6 +46,10 @@
         {{ errorMessage }}
       </div>
 
+      <div v-if="successMessage" class="success">
+        {{ successMessage }}
+      </div>
+
       <div class="result-section" v-if="pathResult">
         <h3>Results</h3>
         <div class="result-info">
@@ -126,7 +130,6 @@ const jsonPath = ref('')
 const pathResult = ref<any>(null)
 const errorMessage = ref('')
 const showHistory = ref(false)
-
 function evaluatePath() {
   errorMessage.value = ''
   pathResult.value = null
@@ -187,12 +190,17 @@ function formatJson() {
   }
 }
 
-function copyResultToClipboard() {
+const successMessage = ref('')
+
+async function copyResultToClipboard() {
   if (!pathResult.value) return
 
   try {
-    navigator.clipboard.writeText(formattedResult.value)
+    await navigator.clipboard.writeText(formattedResult.value)
+    successMessage.value = 'Result copied to clipboard!'
+    setTimeout(() => { successMessage.value = '' }, 2000)
   } catch (error) {
+    errorMessage.value = 'Failed to copy to clipboard'
     console.error('Failed to copy to clipboard', error)
   }
 }

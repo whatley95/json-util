@@ -177,9 +177,13 @@ export function clearHistory(toolName: string): void {
 export function hasAnyHistory(): boolean {
     for (const key in localStorage) {
         if (key.startsWith(LOCAL_STORAGE_PREFIX) && key.endsWith('history')) {
-            const stored = localStorage.getItem(key);
-            if (stored && JSON.parse(stored).length > 0) {
-                return true;
+            try {
+                const stored = localStorage.getItem(key);
+                if (stored && JSON.parse(stored).length > 0) {
+                    return true;
+                }
+            } catch (error) {
+                console.error('Corrupted history entry, skipping:', key, error);
             }
         }
     }

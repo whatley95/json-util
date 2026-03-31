@@ -140,6 +140,37 @@ const sampleData = {
   }
 }
 
+/**
+ * Convert a JS value to object-literal notation (unquoted keys where valid).
+ */
+function toObjectNotation(value: unknown, indent: number = 0): string {
+  const pad = '  '.repeat(indent)
+  const padInner = '  '.repeat(indent + 1)
+
+  if (value === null) return 'null'
+  if (value === undefined) return 'undefined'
+  if (typeof value === 'string') return JSON.stringify(value)
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]'
+    const items = value.map(v => `${padInner}${toObjectNotation(v, indent + 1)}`)
+    return `[\n${items.join(',\n')}\n${pad}]`
+  }
+
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+    if (entries.length === 0) return '{}'
+    const items = entries.map(([k, v]) => {
+      const key = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k) ? k : JSON.stringify(k)
+      return `${padInner}${key}: ${toObjectNotation(v, indent + 1)}`
+    })
+    return `{\n${items.join(',\n')}\n${pad}}`
+  }
+
+  return String(value)
+}
+
 const jsonToObject = () => {
   errorMessage.value = ''
   successMessage.value = ''
@@ -147,8 +178,8 @@ const jsonToObject = () => {
 
   try {
     const parsed = JSON.parse(jsonString.value)
-    jsObject.value = JSON.stringify(parsed, null, 2)
-    successMessage.value = 'JSON converted to object successfully!'
+    jsObject.value = toObjectNotation(parsed)
+    successMessage.value = 'JSON converted to object notation successfully!'
 
     // Save to history
     saveCurrentToHistory('JSON to Object')
